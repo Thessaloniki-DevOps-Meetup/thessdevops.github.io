@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+import siteConfig from '../content/site.json';
+---
+
+<Layout title={siteConfig.name}>
+  <section class="max-w-4xl mx-auto px-4 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4">
+        <span class="text-accent">DevOps</span> Thessaloníki
+      </h1>
+      {siteConfig.tagline && (
+        <p class="text-xl text-primary/70 font-mono">{siteConfig.tagline}</p>
+      )}
+    </div>
+
+    {siteConfig.description && (
+      <div class="prose prose-lg mx-auto text-center text-primary/80">
+        <p>{siteConfig.description}</p>
+      </div>
+    )}
+
+    {siteConfig.meetupUrl && (
+      <div class="text-center mt-12">
+        <a 
+          href={siteConfig.meetupUrl} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="inline-block bg-primary text-cream px-6 py-3 font-mono text-sm hover:bg-accent transition-colors"
+        >
+          Join us on Meetup →
+        </a>
+      </div>
+    )}
+  </section>
+</Layout>

@@ -73,19 +73,22 @@ Container/port/harbor aesthetic:
 
 ## Content Schema
 
-### Site Configuration (`src/content/site.yaml`)
+### Site Configuration (`src/content/site.json`)
 
-```yaml
-name: "DevOps Thessaloníki"
-tagline: ""
-description: ""
-email: ""
-meetupUrl: ""                 # Link to meetup.com group
-socials:
-  discord: ""
-  linkedin: ""
-  github: ""
-  twitter: ""
+```json
+{
+  "name": "DevOps Thessaloníki",
+  "tagline": "",
+  "description": "",
+  "email": "",
+  "meetupUrl": "",
+  "socials": {
+    "discord": "",
+    "linkedin": "",
+    "github": "",
+    "twitter": ""
+  }
+}
 ```
 
 ### Event (`src/content/events/001.md`)
