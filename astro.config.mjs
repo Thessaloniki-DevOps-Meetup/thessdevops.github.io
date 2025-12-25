@@ -3,7 +3,7 @@ import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
   integrations: [tailwind()],
-  site: 'https://devops-thessaloniki.github.io',
+  site: 'https://thessaloniki-devops-meetup.github.io',
   base: '/',
   output: 'static',
   build: {
