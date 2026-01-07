@@ -2,7 +2,7 @@
 
 Static website for the Thessaloníki DevOps Meetup community.
 
-**Live site:** https://thessaloniki-devops-meetup.github.io
+**Live site:** https://www.thessdevops.org
 
 ## Tech Stack
 
