@@ -110,7 +110,9 @@ ${eventsNav}
                   <div class="text-sm text-cream/60 mb-4">
                     <span>{new Date(event.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     {event.frontmatter.location && (
-                      <span> · {event.frontmatter.location}</span>
+                      <span> · {event.frontmatter.locationUrl ? (
+                        <a href={event.frontmatter.locationUrl} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{event.frontmatter.location}</a>
+                      ) : event.frontmatter.location}</span>
                     )}
                   </div>
                   {event.frontmatter.description && (
@@ -159,7 +161,9 @@ ${eventsNav}
                   <div class="text-sm text-cream/60 mb-4">
                     <span>{new Date(event.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     {event.frontmatter.location && (
-                      <span> · {event.frontmatter.location}</span>
+                      <span> · {event.frontmatter.locationUrl ? (
+                        <a href={event.frontmatter.locationUrl} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{event.frontmatter.location}</a>
+                      ) : event.frontmatter.location}</span>
                     )}
                   </div>
                   {event.frontmatter.description && (
