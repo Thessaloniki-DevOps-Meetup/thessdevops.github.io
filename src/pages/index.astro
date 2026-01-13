@@ -7,9 +7,16 @@ const sortedEvents = allEvents
   .sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
 
 // Build YAML navigation HTML
-const eventsNav = sortedEvents.map((e) => 
-  `      - <a href="#event-${e.frontmatter.number}" class="text-cream/70 hover:text-accent transition-colors">${String(e.frontmatter.number).padStart(3, '0')}</a>`
-).join('\n');
+const eventsNav = sortedEvents.map((e) => {
+  const title = e.frontmatter.title ?? '';
+  const date = e.frontmatter.date
+    ? new Date(e.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : '';
+  const location = e.frontmatter.location ? ` · ${e.frontmatter.location}` : '';
+  const details = [date, location].filter(Boolean).join('').trim();
+
+  return `    - <a href="#event-${e.frontmatter.number}" class="text-cream/70 hover:text-accent transition-colors">${title || `event ${String(e.frontmatter.number).padStart(3, '0')}`}</a><span class="text-cream/50">:</span> <span class="text-cream/50">|</span>\n        <span class="text-cream/40">${details || '~'}</span>`;
+}).join('\n');
 
 const socialLink = (key: string, url: string) => 
   url 
