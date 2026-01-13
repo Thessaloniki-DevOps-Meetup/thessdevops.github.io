@@ -2,12 +2,22 @@
 import siteConfig from '../content/site.json';
 
 const allEvents = await Astro.glob('../content/events/*.md');
-const sortedEvents = allEvents
-  .filter((e) => !e.frontmatter.draft)
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const publishedEvents = allEvents
+  .filter((e) => !e.frontmatter.draft);
+
+const upcomingEvents = publishedEvents
+  .filter((e) => new Date(e.frontmatter.date) >= today)
+  .sort((a, b) => new Date(a.frontmatter.date).getTime() - new Date(b.frontmatter.date).getTime());
+
+const pastEvents = publishedEvents
+  .filter((e) => new Date(e.frontmatter.date) < today)
   .sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
 
 // Build YAML navigation HTML
-const eventsNav = sortedEvents.map((e) => {
+const buildEventNav = (e: any) => {
   const title = e.frontmatter.title ?? '';
   const date = e.frontmatter.date
     ? new Date(e.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -15,8 +25,18 @@ const eventsNav = sortedEvents.map((e) => {
   const location = e.frontmatter.location ? ` · ${e.frontmatter.location}` : '';
   const details = [date, location].filter(Boolean).join('').trim();
 
-  return `    - <a href="#event-${e.frontmatter.number}" class="text-cream/70 hover:text-accent transition-colors">${title || `event ${String(e.frontmatter.number).padStart(3, '0')}`}</a><span class="text-cream/50">:</span> <span class="text-cream/50">|</span>\n        <span class="text-cream/40">${details || '~'}</span>`;
-}).join('\n');
+  return `        - <a href="#event-${e.frontmatter.number}" class="text-cream/70 hover:text-accent transition-colors">${title || `event ${String(e.frontmatter.number).padStart(3, '0')}`}</a><span class="text-cream/50">:</span> <span class="text-cream/50">|</span>\n            <span class="text-cream/40">${details || '~'}</span>`;
+};
+
+const upcomingNav = upcomingEvents.length > 0
+  ? `    - <a href="#upcoming" class="text-cream hover:text-accent transition-colors">upcoming</a><span class="text-cream/50">:</span>\n${upcomingEvents.map(buildEventNav).join('\n')}`
+  : '';
+
+const pastNav = pastEvents.length > 0
+  ? `    - <a href="#past" class="text-cream hover:text-accent transition-colors">past</a><span class="text-cream/50">:</span>\n${pastEvents.map(buildEventNav).join('\n')}`
+  : '';
+
+const eventsNav = [upcomingNav, pastNav].filter(Boolean).join('\n');
 
 const socialLink = (key: string, url: string) => 
   url 
@@ -34,7 +54,6 @@ const yamlNav = `<span class="text-cream/50"># ${siteConfig.name}</span>
   - <a href="#home" class="text-cream hover:text-accent transition-colors">home</a>
   - <a href="#events" class="text-cream hover:text-accent transition-colors">events</a><span class="text-cream/50">:</span>
 ${eventsNav}
-  - <a href="#contact" class="text-cream hover:text-accent transition-colors">contact</a>
 
 <span class="text-accent">socials</span><span class="text-cream/50">:</span>
   <span class="text-blue-gray">meetup</span><span class="text-cream/50">:</span> ${socialLink('meetup', siteConfig.socials.meetup)}
@@ -77,14 +96,63 @@ ${eventsNav}
         </section>
 
         <!-- Events Section -->
-        <section id="events" class="min-h-[50vh] lg:min-h-screen p-4 lg:p-8 border-b border-cream/10">
-          <h2 class="text-xl lg:text-2xl font-bold mb-4 lg:mb-8 text-accent">Events</h2>
+        <section id="events" class="border-b border-cream/10">
+
+        {/* Upcoming Events Section - only if there are upcoming events */}
+        {upcomingEvents.length > 0 && (
+          <section id="upcoming" class="min-h-[50vh] lg:min-h-screen p-4 lg:p-8 border-b border-cream/10">
+            <h2 class="text-xl lg:text-2xl font-bold mb-4 lg:mb-8 text-accent">Upcoming Events</h2>
+            <div class="space-y-12">
+              {upcomingEvents.map((event) => (
+                <article id={`event-${event.frontmatter.number}`} class="border-l-2 border-accent/30 pl-6">
+                  <div class="text-cream/50 text-sm mb-1">#{String(event.frontmatter.number).padStart(3, '0')}</div>
+                  <h3 class="text-xl font-bold mb-2">{event.frontmatter.title}</h3>
+                  <div class="text-sm text-cream/60 mb-4">
+                    <span>{new Date(event.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    {event.frontmatter.location && (
+                      <span> · {event.frontmatter.location}</span>
+                    )}
+                  </div>
+                  {event.frontmatter.description && (
+                    <p class="text-cream/70 mb-4">{event.frontmatter.description}</p>
+                  )}
+                  {event.frontmatter.talks && event.frontmatter.talks.length > 0 && (
+                    <div class="mt-4">
+                      <div class="text-sm text-accent mb-2">Talks:</div>
+                      <ul class="space-y-3">
+                        {event.frontmatter.talks.map((talk: any) => (
+                          <li class="text-sm pl-4 border-l border-cream/20">
+                            <div class="font-semibold">{talk.title}</div>
+                            {talk.speakers && (
+                              <div class="text-cream/50">
+                                by {talk.speakers.map((s: any) => s.name).join(', ')}
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {event.frontmatter.meetupUrl && (
+                    <a href={event.frontmatter.meetupUrl} target="_blank" rel="noopener noreferrer" class="inline-block mt-4 text-sm text-accent hover:text-cream transition-colors">
+                      View on Meetup →
+                    </a>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- Past Events Section -->
+        <section id="past" class="min-h-[50vh] lg:min-h-screen p-4 lg:p-8 border-b border-cream/10">
+          <h2 class="text-xl lg:text-2xl font-bold mb-4 lg:mb-8 text-accent">Past Events</h2>
           
-          {sortedEvents.length === 0 ? (
-            <p class="text-cream/50">No events yet.</p>
+          {pastEvents.length === 0 ? (
+            <p class="text-cream/50">No past events.</p>
           ) : (
             <div class="space-y-12">
-              {sortedEvents.map((event) => (
+              {pastEvents.map((event) => (
                 <article id={`event-${event.frontmatter.number}`} class="border-l-2 border-accent/30 pl-6">
                   <div class="text-cream/50 text-sm mb-1">#{String(event.frontmatter.number).padStart(3, '0')}</div>
                   <h3 class="text-xl font-bold mb-2">{event.frontmatter.title}</h3>
@@ -125,48 +193,7 @@ ${eventsNav}
           )}
         </section>
 
-        <!-- Contact Section -->
-        <section id="contact" class="min-h-[50vh] lg:min-h-screen p-4 lg:p-8 flex flex-col justify-center">
-          <h2 class="text-xl lg:text-2xl font-bold mb-4 lg:mb-8 text-accent">Contact</h2>
-          
-          <div class="space-y-4 text-cream/70">
-            {siteConfig.email && (
-              <p>
-                <span class="text-cream/50">email:</span>{" "}
-                <a href={`mailto:${siteConfig.email}`} class="hover:text-accent transition-colors">{siteConfig.email}</a>
-              </p>
-            )}
-            {siteConfig.socials.meetup && (
-              <p>
-                <span class="text-cream/50">meetup:</span>{" "}
-                <a href={siteConfig.socials.meetup} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{siteConfig.socials.meetup}</a>
-              </p>
-            )}
-            {siteConfig.socials.discord && (
-              <p>
-                <span class="text-cream/50">discord:</span>{" "}
-                <a href={siteConfig.socials.discord} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{siteConfig.socials.discord}</a>
-              </p>
-            )}
-            {siteConfig.socials.linkedin && (
-              <p>
-                <span class="text-cream/50">linkedin:</span>{" "}
-                <a href={siteConfig.socials.linkedin} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{siteConfig.socials.linkedin}</a>
-              </p>
-            )}
-            {siteConfig.socials.github && (
-              <p>
-                <span class="text-cream/50">github:</span>{" "}
-                <a href={siteConfig.socials.github} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{siteConfig.socials.github}</a>
-              </p>
-            )}
-          </div>
-
-          {!siteConfig.email && Object.values(siteConfig.socials).every(v => !v) && (
-            <p class="text-cream/50">No contact information yet.</p>
-          )}
         </section>
-
       </main>
     </div>
   </body>
