@@ -12,9 +12,9 @@ talks:
   - title: "The Serverless Symphony: How to Orchestrate Your AWS Workflows"
     speakers:
       - name: "Dimitris Lambrianidis"
-        url: ""
+        url: "https://www.linkedin.com/in/lambrianidis-dimitris/"
       - name: "Dimitris Zaras"
-        url: ""
+        url: "https://www.linkedin.com/in/dimitriszaras/"
     description: "Dive beyond basic Lambda calls and learn how to orchestrate complex business logic using AWS Step Functions, EventBridge, DynamoDB, and S3. Includes a live demo!"
     videoUrl: ""
     slidesUrl: ""
