@@ -57,21 +57,43 @@ Container/port/harbor aesthetic:
 
 ## Directory Structure
 
+Each event lives in its own directory under `src/content/events/`. The
+event's markdown is `index.md`; sibling files (notes, source for slides,
+PDFs that are too big for `public/`) can live next to it. Assets that
+need a public URL (linked from `slidesUrl` / `videoUrl` / `materials`)
+go under `public/events/NNN/` and are referenced with root-relative
+paths (e.g. `/events/003/observability.pdf`).
+
 ```
 /src
   /content
-    site.json                 # Site configuration
+    site.json                       # Site configuration
     /events
-      _template.md            # Template file (draft: true, ignored)
-      001.md                  # Event files (numbered)
-      002.md
+      /_template
+        index.md                    # Template (draft: true, ignored)
+      /001
+        index.md
+      /002
+        index.md
+      /003
+        index.md
+        notes.md                    # (optional) extra notes — not auto-rendered
+  /components
+    EventCard.astro                 # Reused per-event card
   /pages
-    index.astro               # Single-page app
+    index.astro                     # Single-page app
 /public
   favicon.svg
-  /images
-    /events                   # Event hero images (user-provided)
+  /events
+    /003
+      observability.pdf             # Referenced as /events/003/observability.pdf
+      hero.jpg                      # Referenced as /events/003/hero.jpg
 ```
+
+Event lookup uses the glob `src/content/events/**/*.md` and filters
+on `frontmatter.number > 0 && !draft`, so the template (number 0,
+draft) is silently skipped. Files without a `number` (notes, READMEs)
+are also ignored — keep those next to `index.md` freely.
 
 ## Content Schema
 
@@ -92,7 +114,7 @@ Container/port/harbor aesthetic:
 }
 ```
 
-### Event (`src/content/events/001.md`)
+### Event (`src/content/events/001/index.md`)
 
 ```yaml
 ---
@@ -103,19 +125,38 @@ location: ""
 locationUrl: ""               # Optional: Google Maps link
 meetupUrl: ""                 # Link to this event on meetup.com
 description: ""
-image: ""                     # Optional: path to hero image
+image: ""                     # Optional: path to hero image (e.g. /events/001/hero.jpg)
+draft: false
 talks:
   - title: ""
     speakers:
       - name: ""
         url: ""               # Optional: speaker's LinkedIn/Twitter
     description: ""
-    videoUrl: ""              # Optional
-    slidesUrl: ""             # Optional
+    slidesUrl: ""             # Optional shorthand — renders as ◆ slides pill
+    videoUrl: ""              # Optional shorthand — renders as ▶ video pill
+    materials:                # Optional richer list, rendered as pills below slides/video
+      - type: slides          #   known types: slides, video|recording, code|repo|github, demo, notes
+        label: "Slides (PDF)" #   optional label override
+        url: "/events/001/talk-1.pdf"
+      - type: code
+        label: "GitHub repo"
+        url: "https://github.com/..."
 ---
 
-Optional markdown body for additional event details, notes, or recap.
+Optional markdown body — recap, photos, links to attendee notes,
+sponsor mentions. Rendered inline under the event card.
 ```
+
+#### Material conventions
+
+- Anything in `public/events/NNN/` is served at `https://site/events/NNN/...`.
+- For external links (YouTube, Speakerdeck, blog recaps), just paste
+  the full URL into `url`.
+- `type` controls the glyph; unknown types fall back to `↗`.
+- `slidesUrl` / `videoUrl` are shorthand for a single material each;
+  use `materials[]` when you have more than one resource of the same
+  kind, or types beyond slides/video.
 
 ## Design Principles
 

@@ -1,0 +1,10 @@
+---
+interface Props {
+  yamlNav: string;
+}
+const { yamlNav } = Astro.props;
+---
+<pre class="text-xs lg:text-sm leading-relaxed whitespace-pre-wrap break-words" set:html={yamlNav} />
+<div class="mt-3 text-xs text-cream/50">
+  <span class="text-accent">$</span> <span class="caret">▊</span>
+</div>
