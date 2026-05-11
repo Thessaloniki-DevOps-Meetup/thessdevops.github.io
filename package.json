@@ -7,7 +7,9 @@
     "dev": "astro dev",
     "prebuild": "node scripts/copy-event-assets.mjs",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "check:links": "node scripts/check-event-asset-links.mjs",
+    "check": "npm run build && npm run check:links"
   },
   "dependencies": {
     "astro": "^4.16.0",
