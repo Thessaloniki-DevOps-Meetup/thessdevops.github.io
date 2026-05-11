@@ -31,10 +31,9 @@ talks:
         url: https://github.com/your-repo
 ```
 
-4. Open a PR. When the PR form loads, GitHub will offer a few
-   templates — pick **"talk"** (or follow
-   [this link](https://github.com/Thessaloniki-DevOps-Meetup/thessdevops.github.io/compare/main...HEAD?template=talk.md)
-   to load it directly). It's a short checklist you fill in.
+4. Open a PR. The PR form pre-loads a short checklist — fill in the
+   event number, talk title, what you're adding, and paste the
+   `materials:` snippet. Done.
 
 ### Notes for speakers
 
