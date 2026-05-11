@@ -3,8 +3,7 @@ Thanks for sharing materials from your talk! Fill in the sections
 below and you're good to go.
 
 If this PR is about something else (layout, copy fix, infra…),
-go back and pick the "Other change" template, or just replace this
-content with a short description of what you're doing.
+just delete this template and write a short description.
 -->
 
 ## Talk materials
