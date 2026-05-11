@@ -3,7 +3,9 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
+    "predev": "node scripts/copy-event-assets.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/copy-event-assets.mjs",
     "build": "astro build",
     "preview": "astro preview"
   },

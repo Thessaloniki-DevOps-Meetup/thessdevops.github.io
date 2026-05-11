@@ -118,22 +118,48 @@ Optional markdown body — event recap, photos, links to attendee notes.
 
 Set `draft: true` to hide an event from the site.
 
-### Attaching Presentation Material
+### Attaching Slides, Recordings & Other Materials (for speakers)
 
-Put files that need a public URL (slides, recordings hosted locally,
-hero images) under `public/events/NNN/`. Reference them from the event
-or talk frontmatter via root-relative paths:
+Each event has its own folder. To add resources for a talk you gave,
+do everything in **one folder** — no need to touch anywhere else.
+
+1. Drop your file(s) directly into the event folder, e.g.
+   `src/content/events/003/observability-slides.pdf`. PDFs, images,
+   ZIPs — any blob is fine. You can add as many as you want.
+2. Open `src/content/events/003/index.md`, find your talk, and add a
+   `materials:` block under it pointing to your file(s):
 
 ```yaml
-image: /events/003/hero.jpg
 talks:
-  - title: "..."
-    slidesUrl: /events/003/observability.pdf
+  - title: "From Blindness to Supervision"
+    speakers:
+      - name: "Pavlos Karakalidis"
+    description: "..."
+    materials:
+      - type: slides
+        label: "Slides (PDF)"
+        url: /events/003/observability-slides.pdf
+      - type: video
+        url: https://youtu.be/...
+      - type: code
+        url: https://github.com/...
 ```
 
-For external links (YouTube, Speakerdeck, blog recaps), use the full
-URL. The `materials[]` array lets you attach multiple resources per
-talk and override the displayed label.
+3. Open a PR. That's it.
+
+#### Notes
+
+- The URL for an uploaded file is always `/events/<NNN>/<filename>`
+  (matching the folder name). The build copies your file into
+  `public/events/<NNN>/` automatically — you don't have to.
+- External links (YouTube, Speakerdeck, blog posts, GitHub) just use
+  the full URL — no need to upload anything.
+- `type` controls the icon next to the pill. Known types: `slides`,
+  `video` / `recording`, `code` / `repo` / `github`, `demo`, `notes`.
+  Anything else falls back to a generic arrow.
+- `label` is optional — leave it out and the type is used.
+- `slidesUrl` / `videoUrl` still work as one-line shorthand if you
+  only have one slide deck or one recording.
 
 ## Deployment
 

@@ -21,4 +21,11 @@ dist/
 
 # Local-only redesign artifacts
 screenshots/
-scripts/
+scripts/*
+# … but track build-time scripts.
+!scripts/copy-event-assets.mjs
+
+# Event blobs are sourced from src/content/events/<NNN>/ and copied
+# into public/events/<NNN>/ by scripts/copy-event-assets.mjs.
+# Keep the generated copies out of git.
+public/events/
