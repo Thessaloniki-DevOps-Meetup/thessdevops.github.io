@@ -36,8 +36,19 @@ const upcomingNav = upcomingEvents.length > 0
   ? `  <span class="text-blue-gray">upcoming</span><span class="text-cream/40">:</span>\n${upcomingEvents.map(buildEventNav).join('\n')}`
   : '';
 
+const PAST_INLINE = 2;
+const pastInline = pastEvents.slice(0, PAST_INLINE);
+const pastFolded = pastEvents.slice(PAST_INLINE);
+
+const foldedBlock = pastFolded.length > 0
+  ? `<details class="nav-fold"><summary class="cursor-pointer list-none"><span class="text-cream/40 hover:text-accent transition-colors">      <span class="nav-fold-show"># ${pastFolded.length} more ▸</span><span class="nav-fold-hide"># collapse ▴</span></span></summary>${pastFolded.map((e) => '\n' + buildEventNav(e)).join('')}</details>`
+  : '';
+
 const pastNav = pastEvents.length > 0
-  ? `  <span class="text-blue-gray">past</span><span class="text-cream/40">:</span>\n${pastEvents.map(buildEventNav).join('\n')}`
+  ? `  <span class="text-blue-gray">past</span><span class="text-cream/40">:</span>\n${[
+      pastInline.map(buildEventNav).join('\n'),
+      foldedBlock,
+    ].filter(Boolean).join('\n')}`
   : '';
 
 const eventsNav = [upcomingNav, pastNav].filter(Boolean).join('\n');
@@ -77,6 +88,13 @@ ${eventsNav}`;
       /* Blinking caret */
       @keyframes blink { 50% { opacity: 0; } }
       .caret { animation: blink 1.1s steps(2) infinite; }
+      /* Foldable past-events block inside nav.yaml */
+      .nav-fold summary { display: block; }
+      .nav-fold summary::-webkit-details-marker { display: none; }
+      .nav-fold summary::marker { content: ''; }
+      .nav-fold .nav-fold-hide { display: none; }
+      .nav-fold[open] .nav-fold-show { display: none; }
+      .nav-fold[open] .nav-fold-hide { display: inline; }
     </style>
   </head>
   <body class="bg-primary text-cream font-mono antialiased">
