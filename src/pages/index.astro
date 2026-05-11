@@ -26,7 +26,7 @@ const nextEventNumber = upcomingEvents[0]?.frontmatter.number ?? null;
 const buildEventNav = (e: any) => {
   const title = e.frontmatter.title ?? '';
   const date = e.frontmatter.date
-    ? new Date(e.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    ? new Date(e.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     : '';
   const label = title || `event ${String(e.frontmatter.number).padStart(3, '0')}`;
   return `      - <a href="#event-${e.frontmatter.number}" class="text-cream/80 hover:text-accent transition-colors">${label}</a><span class="text-cream/40">:</span> <span class="text-cream/40">${date || '~'}</span>`;
