@@ -12,7 +12,7 @@ talks:
   - title: "Optimizing Data Platforms at Scale: Lessons Learned from Databricks"
     speakers:
       - name: "Amalia Georgoudi"
-        url: ""
+        url: "https://www.linkedin.com/in/amaliageorgoudi/"
     description: "Best practices in platform optimization focusing on platform architecture and infrastructure, compute optimization, and code engineering optimization. How FinOps principles and observability can drive efficiency."
     videoUrl: ""
     slidesUrl: ""
