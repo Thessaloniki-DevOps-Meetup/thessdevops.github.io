@@ -39,15 +39,23 @@ The site will be available at `http://localhost:4321`
 
 ```
 ├── src/
+│   ├── components/
+│   │   └── EventCard.astro    # Reusable event/talk card
 │   ├── content/
 │   │   ├── site.json          # Site configuration
-│   │   └── events/            # Event markdown files
-│   │       ├── _template.md   # Template (ignored)
-│   │       ├── 001.md
-│   │       └── 002.md
+│   │   └── events/            # One directory per event
+│   │       ├── _template/
+│   │       │   └── index.md   # Template (draft: true, ignored)
+│   │       ├── 001/
+│   │       │   └── index.md
+│   │       └── 002/
+│   │           └── index.md
 │   └── pages/
 │       └── index.astro        # Single-page app
 ├── public/                    # Static assets
+│   └── events/                # Per-event public assets (slides, hero images)
+│       └── 003/
+│           └── slides.pdf
 ├── DESIGN.md                  # Design specification
 └── astro.config.mjs           # Astro configuration
 ```
@@ -75,18 +83,19 @@ Edit `src/content/site.json`:
 
 ### Adding Events
 
-Create a new markdown file in `src/content/events/` (e.g., `003.md`):
+Create a new directory under `src/content/events/` with the event
+number (zero-padded), e.g. `006/`, and add an `index.md` inside it:
 
 ```markdown
 ---
-number: 3
-title: "Meetup #003"
-date: 2025-02-15
+number: 6
+title: "Meetup #006"
+date: 2026-07-09
 location: "Venue Name"
 locationUrl: ""
 meetupUrl: ""
 description: ""
-image: ""
+image: ""                # Optional: e.g. /events/006/hero.jpg
 draft: false
 talks:
   - title: "Talk Title"
@@ -94,12 +103,37 @@ talks:
       - name: "Speaker Name"
         url: ""
     description: ""
-    videoUrl: ""
-    slidesUrl: ""
+    slidesUrl: ""        # Optional shorthand — renders as a "◆ slides" pill
+    videoUrl: ""         # Optional shorthand — renders as a "▶ video" pill
+    materials:           # Optional, richer list of attachments
+      - type: slides
+        label: "Slides (PDF)"
+        url: "/events/006/talk-1.pdf"
+      - type: code
+        url: "https://github.com/..."
 ---
+
+Optional markdown body — event recap, photos, links to attendee notes.
 ```
 
 Set `draft: true` to hide an event from the site.
+
+### Attaching Presentation Material
+
+Put files that need a public URL (slides, recordings hosted locally,
+hero images) under `public/events/NNN/`. Reference them from the event
+or talk frontmatter via root-relative paths:
+
+```yaml
+image: /events/003/hero.jpg
+talks:
+  - title: "..."
+    slidesUrl: /events/003/observability.pdf
+```
+
+For external links (YouTube, Speakerdeck, blog recaps), use the full
+URL. The `materials[]` array lets you attach multiple resources per
+talk and override the displayed label.
 
 ## Deployment
 

@@ -18,3 +18,7 @@ dist/
 
 # Astro
 .astro/
+
+# Local-only redesign artifacts
+screenshots/
+scripts/

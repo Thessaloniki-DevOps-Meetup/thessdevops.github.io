@@ -1,12 +1,15 @@
 ---
 import siteConfig from '../content/site.json';
+import EventCard from '../components/EventCard.astro';
+import Hero from '../components/Hero.astro';
+import NavYaml from '../components/NavYaml.astro';
 
-const allEvents = await Astro.glob('../content/events/*.md');
+const allEvents = await Astro.glob('../content/events/**/*.md');
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 const publishedEvents = allEvents
-  .filter((e) => !e.frontmatter.draft);
+  .filter((e) => !e.frontmatter.draft && e.frontmatter.number && e.frontmatter.number > 0);
 
 const upcomingEvents = publishedEvents
   .filter((e) => new Date(e.frontmatter.date) >= today)
@@ -16,50 +19,36 @@ const pastEvents = publishedEvents
   .filter((e) => new Date(e.frontmatter.date) < today)
   .sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
 
-// Build YAML navigation HTML
+const orderedEvents = [...upcomingEvents, ...pastEvents];
+const nextEventNumber = upcomingEvents[0]?.frontmatter.number ?? null;
+
+// YAML nav: site + navigation (no socials — those live in the hero CTAs)
 const buildEventNav = (e: any) => {
   const title = e.frontmatter.title ?? '';
   const date = e.frontmatter.date
-    ? new Date(e.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    ? new Date(e.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
     : '';
-  const location = e.frontmatter.location ? ` · ${e.frontmatter.location}` : '';
-  const details = [date, location].filter(Boolean).join('').trim();
-
-  return `        - <a href="#event-${e.frontmatter.number}" class="text-cream/70 hover:text-accent transition-colors">${title || `event ${String(e.frontmatter.number).padStart(3, '0')}`}</a><span class="text-cream/50">:</span> <span class="text-cream/50">|</span>\n            <span class="text-cream/40">${details || '~'}</span>`;
+  const label = title || `event ${String(e.frontmatter.number).padStart(3, '0')}`;
+  return `      - <a href="#event-${e.frontmatter.number}" class="text-cream/80 hover:text-accent transition-colors">${label}</a><span class="text-cream/40">:</span> <span class="text-cream/40">${date || '~'}</span>`;
 };
 
 const upcomingNav = upcomingEvents.length > 0
-  ? `    - <a href="#upcoming" class="text-cream hover:text-accent transition-colors">upcoming</a><span class="text-cream/50">:</span>\n${upcomingEvents.map(buildEventNav).join('\n')}`
+  ? `  <span class="text-blue-gray">upcoming</span><span class="text-cream/40">:</span>\n${upcomingEvents.map(buildEventNav).join('\n')}`
   : '';
 
 const pastNav = pastEvents.length > 0
-  ? `    - <a href="#past" class="text-cream hover:text-accent transition-colors">past</a><span class="text-cream/50">:</span>\n${pastEvents.map(buildEventNav).join('\n')}`
+  ? `  <span class="text-blue-gray">past</span><span class="text-cream/40">:</span>\n${pastEvents.map(buildEventNav).join('\n')}`
   : '';
 
 const eventsNav = [upcomingNav, pastNav].filter(Boolean).join('\n');
 
-const socialLink = (key: string, url: string) => 
-  url 
-    ? `<a href="${url}" target="_blank" class="text-cream hover:text-accent transition-colors">${url}</a>`
-    : `<span class="text-cream/30">~</span>`;
+const yamlNav = `<span class="text-cream/40">---</span>
+<span class="text-accent">site</span><span class="text-cream/40">:</span>
+  <span class="text-blue-gray">name</span><span class="text-cream/40">:</span> <span class="text-cream">"${siteConfig.name}"</span>
+  <span class="text-blue-gray">tagline</span><span class="text-cream/40">:</span> <span class="text-cream">"${siteConfig.tagline || '~'}"</span>
 
-const yamlNav = `<span class="text-cream/50"># ${siteConfig.name}</span>
-<span class="text-cream/50">---</span>
-
-<span class="text-accent">site</span><span class="text-cream/50">:</span>
-  <span class="text-blue-gray">name</span><span class="text-cream/50">:</span> <span class="text-cream">"${siteConfig.name}"</span>
-  <span class="text-blue-gray">tagline</span><span class="text-cream/50">:</span> <span class="text-cream">"${siteConfig.tagline || '~'}"</span>
-
-<span class="text-accent">navigation</span><span class="text-cream/50">:</span>
-  - <a href="#home" class="text-cream hover:text-accent transition-colors">home</a>
-  - <a href="#events" class="text-cream hover:text-accent transition-colors">events</a><span class="text-cream/50">:</span>
-${eventsNav}
-
-<span class="text-accent">socials</span><span class="text-cream/50">:</span>
-  <span class="text-blue-gray">meetup</span><span class="text-cream/50">:</span> ${socialLink('meetup', siteConfig.socials.meetup)}
-  <span class="text-blue-gray">discord</span><span class="text-cream/50">:</span> ${socialLink('discord', siteConfig.socials.discord)}
-  <span class="text-blue-gray">linkedin</span><span class="text-cream/50">:</span> ${socialLink('linkedin', siteConfig.socials.linkedin)}
-  <span class="text-blue-gray">github</span><span class="text-cream/50">:</span> ${socialLink('github', siteConfig.socials.github)}`;
+<span class="text-accent">events</span><span class="text-cream/40">:</span>
+${eventsNav}`;
 ---
 
 <!doctype html>
@@ -70,135 +59,103 @@ ${eventsNav}
     <meta name="description" content={siteConfig.description || siteConfig.name} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{siteConfig.name}</title>
+    <style is:global>
+      :root {
+        --primary: #2d4a5e;
+        --accent: #e07a5f;
+        --cream: #f5f0e8;
+        --blue-gray: #d5dfe5;
+      }
+      html { scroll-behavior: smooth; }
+      /* Event body markdown */
+      .event-body :is(p, ul, ol) { color: rgba(245, 240, 232, 0.7); }
+      .event-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+      .event-body ul { list-style: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+      .event-body a { color: var(--accent); }
+      .event-body a:hover { color: var(--cream); }
+      .event-body strong { color: var(--cream); }
+      /* Blinking caret */
+      @keyframes blink { 50% { opacity: 0; } }
+      .caret { animation: blink 1.1s steps(2) infinite; }
+    </style>
   </head>
-  <body class="bg-primary text-cream font-mono">
-    <div class="flex flex-col lg:flex-row h-screen">
-      
-      <!-- Navigation Panel: Bottom fixed on mobile, left side on desktop -->
-      <nav class="order-2 lg:order-1 fixed bottom-0 left-0 right-0 h-1/2 lg:relative lg:h-screen lg:w-1/2 overflow-auto p-8 border-t lg:border-t-0 lg:border-r border-cream/20 bg-primary z-10 flex flex-col">
-        <pre class="text-sm leading-relaxed flex-1 whitespace-pre-wrap break-words" set:html={yamlNav} />
-      </nav>
+  <body class="bg-primary text-cream font-mono antialiased">
 
-      <!-- Content Panel: Top half on mobile, right side on desktop -->
-      <main class="order-1 lg:order-2 h-1/2 lg:h-screen lg:w-1/2 overflow-auto scroll-smooth pb-4 lg:pb-0 break-words">
-        
-        <!-- Home Section -->
-        <section id="home" class="min-h-[50vh] lg:min-h-screen p-4 lg:p-8 flex flex-col justify-center border-b border-cream/10">
-          <h1 class="text-2xl lg:text-4xl font-bold mb-4">
-            {siteConfig.name}
-          </h1>
-          {siteConfig.tagline && (
-            <p class="text-base lg:text-xl text-cream/70 mb-6">{siteConfig.tagline}</p>
-          )}
-          {siteConfig.description && (
-            <p class="text-cream/60 max-w-lg">{siteConfig.description}</p>
-          )}
+    <!-- MOBILE-ONLY: terminal chrome — sticky at top -->
+    <header class="lg:hidden sticky top-0 z-20 bg-primary/95 backdrop-blur border-b border-cream/10">
+      <div class="flex items-center gap-2 px-6 py-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-accent/70"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-cream/30"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-blue-gray/50"></span>
+        <span class="ml-2 text-xs text-cream/40">~/thess-devops</span>
+      </div>
+    </header>
+
+    <!-- MOBILE-ONLY: hero on top -->
+    <section class="lg:hidden border-b border-cream/15 px-6 py-7">
+      <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
+      <Hero />
+    </section>
+
+    <div class="lg:flex lg:flex-row lg:items-start">
+
+      <!-- DESKTOP-ONLY: left aside with about (top) + nav (bottom) -->
+      <aside class="hidden lg:flex lg:w-2/5 lg:h-screen lg:sticky lg:top-0 lg:self-start lg:flex-col lg:border-r lg:border-cream/15 bg-primary">
+        <!-- terminal header chrome -->
+        <div class="flex items-center gap-2 px-8 pt-7 pb-3 border-b border-cream/10 shrink-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-accent/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-cream/30"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-gray/50"></span>
+          <span class="ml-2 text-xs text-cream/40">~/thess-devops</span>
+        </div>
+
+        <!-- about.md -->
+        <section class="flex-1 overflow-auto px-9 py-8 border-b border-cream/15">
+          <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
+          <Hero />
         </section>
 
-        <!-- Events Section -->
-        <section id="events" class="border-b border-cream/10">
+        <!-- nav.yaml -->
+        <section class="flex-1 overflow-auto px-9 py-8">
+          <div class="text-[11px] tracking-widest text-cream/35 mb-4"># nav.yaml</div>
+          <NavYaml yamlNav={yamlNav} />
+        </section>
+      </aside>
 
-        {/* Upcoming Events Section - only if there are upcoming events */}
-        {upcomingEvents.length > 0 && (
-          <section id="upcoming" class="min-h-[50vh] lg:min-h-screen p-4 lg:p-8 border-b border-cream/10">
-            <h2 class="text-xl lg:text-2xl font-bold mb-4 lg:mb-8 text-accent">Upcoming Events</h2>
-            <div class="space-y-12">
-              {upcomingEvents.map((event) => (
-                <article id={`event-${event.frontmatter.number}`} class="border-l-2 border-accent/30 pl-6">
-                  <div class="text-cream/50 text-sm mb-1">#{String(event.frontmatter.number).padStart(3, '0')}</div>
-                  <h3 class="text-xl font-bold mb-2">{event.frontmatter.title}</h3>
-                  <div class="text-sm text-cream/60 mb-4">
-                    <span>{new Date(event.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    {event.frontmatter.location && (
-                      <span> · {event.frontmatter.locationUrl ? (
-                        <a href={event.frontmatter.locationUrl} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{event.frontmatter.location}</a>
-                      ) : event.frontmatter.location}</span>
-                    )}
-                  </div>
-                  {event.frontmatter.description && (
-                    <p class="text-cream/70 mb-4">{event.frontmatter.description}</p>
-                  )}
-                  {event.frontmatter.talks && event.frontmatter.talks.length > 0 && (
-                    <div class="mt-4">
-                      <div class="text-sm text-accent mb-2">Talks:</div>
-                      <ul class="space-y-3">
-                        {event.frontmatter.talks.map((talk: any) => (
-                          <li class="text-sm pl-4 border-l border-cream/20">
-                            <div class="font-semibold">{talk.title}</div>
-                            {talk.speakers && (
-                              <div class="text-cream/50">
-                                by {talk.speakers.map((s: any) => s.name).join(', ')}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {event.frontmatter.meetupUrl && (
-                    <a href={event.frontmatter.meetupUrl} target="_blank" rel="noopener noreferrer" class="inline-block mt-4 text-sm text-accent hover:text-cream transition-colors">
-                      View on Meetup →
-                    </a>
-                  )}
-                </article>
-              ))}
-            </div>
-          </section>
+      <!-- RIGHT PANEL: events -->
+      <main class="lg:w-3/5">
+        {orderedEvents.length === 0 ? (
+          <div class="lg:h-screen flex items-center justify-center p-10">
+            <p class="text-cream/50">No events yet.</p>
+          </div>
+        ) : (
+          orderedEvents.map((event) => {
+            const isUpcoming = new Date(event.frontmatter.date) >= today;
+            const status = isUpcoming
+              ? (event.frontmatter.number === nextEventNumber ? 'next' : 'upcoming')
+              : 'past';
+            return <EventCard event={event} status={status} />;
+          })
         )}
-
-        <!-- Past Events Section -->
-        <section id="past" class="min-h-[50vh] lg:min-h-screen p-4 lg:p-8 border-b border-cream/10">
-          <h2 class="text-xl lg:text-2xl font-bold mb-4 lg:mb-8 text-accent">Past Events</h2>
-          
-          {pastEvents.length === 0 ? (
-            <p class="text-cream/50">No past events.</p>
-          ) : (
-            <div class="space-y-12">
-              {pastEvents.map((event) => (
-                <article id={`event-${event.frontmatter.number}`} class="border-l-2 border-accent/30 pl-6">
-                  <div class="text-cream/50 text-sm mb-1">#{String(event.frontmatter.number).padStart(3, '0')}</div>
-                  <h3 class="text-xl font-bold mb-2">{event.frontmatter.title}</h3>
-                  <div class="text-sm text-cream/60 mb-4">
-                    <span>{new Date(event.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    {event.frontmatter.location && (
-                      <span> · {event.frontmatter.locationUrl ? (
-                        <a href={event.frontmatter.locationUrl} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">{event.frontmatter.location}</a>
-                      ) : event.frontmatter.location}</span>
-                    )}
-                  </div>
-                  {event.frontmatter.description && (
-                    <p class="text-cream/70 mb-4">{event.frontmatter.description}</p>
-                  )}
-                  {event.frontmatter.talks && event.frontmatter.talks.length > 0 && (
-                    <div class="mt-4">
-                      <div class="text-sm text-accent mb-2">Talks:</div>
-                      <ul class="space-y-3">
-                        {event.frontmatter.talks.map((talk: any) => (
-                          <li class="text-sm pl-4 border-l border-cream/20">
-                            <div class="font-semibold">{talk.title}</div>
-                            {talk.speakers && (
-                              <div class="text-cream/50">
-                                by {talk.speakers.map((s: any) => s.name).join(', ')}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {event.frontmatter.meetupUrl && (
-                    <a href={event.frontmatter.meetupUrl} target="_blank" rel="noopener noreferrer" class="inline-block mt-4 text-sm text-accent hover:text-cream transition-colors">
-                      View on Meetup →
-                    </a>
-                  )}
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-
-        </section>
       </main>
     </div>
+
+    <!-- MOBILE-ONLY: sticky-bottom jump-to-nav bar.
+         Pinned to viewport bottom while events are in view; when the nav
+         section enters the viewport from below, the bar un-sticks and
+         scrolls up naturally, revealing the nav. -->
+    <a
+      href="#nav"
+      class="lg:hidden sticky bottom-0 z-20 flex items-center justify-center gap-2 py-3 bg-primary/95 backdrop-blur border-t border-cream/20 text-xs text-cream/70 hover:text-accent transition-colors"
+    >
+      <span class="text-cream/40">▲</span>
+      <span class="tracking-widest"># nav.yaml</span>
+    </a>
+
+    <!-- MOBILE-ONLY: full nav at bottom of document -->
+    <section id="nav" class="lg:hidden px-6 py-8 pb-12">
+      <NavYaml yamlNav={yamlNav} />
+    </section>
+
   </body>
 </html>

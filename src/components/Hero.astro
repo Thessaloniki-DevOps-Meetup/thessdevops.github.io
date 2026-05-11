@@ -1,0 +1,48 @@
+---
+import siteConfig from '../content/site.json';
+---
+<div class="flex items-center gap-2 text-xs text-cream/45 mb-3">
+  <span class="inline-block w-1.5 h-1.5 rounded-full bg-accent"></span>
+  <span class="tracking-widest">DEVOPS · THESSALONÍKI</span>
+</div>
+<h1 class="text-2xl lg:text-3xl font-bold leading-tight mb-3">
+  {siteConfig.name}
+</h1>
+{siteConfig.tagline && (
+  <p class="text-sm lg:text-base text-cream/75 mb-3">{siteConfig.tagline}</p>
+)}
+{siteConfig.description && (
+  <p class="text-xs lg:text-sm text-cream/60 leading-relaxed">{siteConfig.description}</p>
+)}
+
+<div class="flex flex-wrap gap-2 mt-5">
+  {siteConfig.socials.meetup && (
+    <a href={siteConfig.socials.meetup} target="_blank" rel="noopener noreferrer"
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs lg:text-sm bg-accent text-primary font-semibold rounded-sm hover:bg-cream transition-colors">
+      Join on Meetup →
+    </a>
+  )}
+  {siteConfig.socials.discord && (
+    <a href={siteConfig.socials.discord} target="_blank" rel="noopener noreferrer"
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs lg:text-sm border border-cream/30 text-cream hover:border-accent hover:text-accent transition-colors rounded-sm">
+      Discord
+    </a>
+  )}
+  {siteConfig.socials.linkedin && (
+    <a href={siteConfig.socials.linkedin} target="_blank" rel="noopener noreferrer"
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs lg:text-sm border border-cream/30 text-cream hover:border-accent hover:text-accent transition-colors rounded-sm">
+      LinkedIn
+    </a>
+  )}
+  {siteConfig.socials.github && (
+    <a href={siteConfig.socials.github} target="_blank" rel="noopener noreferrer"
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs lg:text-sm border border-cream/30 text-cream hover:border-accent hover:text-accent transition-colors rounded-sm">
+      GitHub
+    </a>
+  )}
+</div>
+
+<p class="text-xs lg:text-sm text-cream/55 mt-5 max-w-md leading-relaxed">
+  Want to <span class="text-cream/80">speak</span>, <span class="text-cream/80">host</span>, or <span class="text-cream/80">sponsor</span>?
+  Ping us on any channel above — everyone's welcome.
+</p>
