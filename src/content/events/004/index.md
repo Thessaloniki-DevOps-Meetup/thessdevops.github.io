@@ -16,4 +16,8 @@ talks:
     description: "One of the most powerful aspects of Kubernetes is its extensibility. However, with flexibility comes complexity. Deploying Kubernetes add-ons extends its functionality, but for most platform engineers managing and maintaining multiple clusters across different environments, this can be challenging. Easing the burden on platform administrators allows them to be more productive and creative while enabling them to perform deployments more easily, quickly, and reliably. Attendees will learn a new, easy, and creative approach to deploying applications, whether on-premises or in the cloud. Join us to take control of your application deployment journey."
     videoUrl: ""
     slidesUrl: ""
+    materials:
+      - type: repo
+        label: "Demo repo"
+        url: "https://github.com/egrosdou01/thessaloniki-devops-meetup"
 ---
