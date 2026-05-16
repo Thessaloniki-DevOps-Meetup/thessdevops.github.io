@@ -36,16 +36,32 @@ src/pages/index.astro      ← <meta property="og:image" ...>
 ## Workflow
 
 1. **Identify what's changing.** Text-only (e.g. new tagline)? Visual (font size, colors, spacing)? Both?
-2. **Edit `scripts/og-template.html`.** It's a self-contained HTML file — CSS is inline, palette variables match `src/pages/index.astro` (`--primary` / `--accent` / `--cream` / `--blue-gray`). Mirror the Hero component's visual language: the `# about.md` faded label on top, an orange dot + `DEVOPS · THESSALONÍKI` chip line, big bold title, tagline, description. **Stop the content at the description** — the card intentionally omits the CTAs and the "speak/host/sponsor" line from the Hero.
+2. **Edit `scripts/og-template.html`.** It's a self-contained HTML file — CSS is inline, palette variables match `src/pages/index.astro` (`--primary` / `--accent` / `--cream` / `--blue-gray`). The card is a 4-element composition: the `# about.md` faded label on top, an orange dot + `DEVOPS · THESSALONÍKI` chip line, big bold title, tagline. The card intentionally drops the Hero's description, CTAs, and "speak/host/sponsor" line — see the readability rule below.
 3. **Mind the title width.** The title uses `white-space: nowrap` and is sized to fit `Thessaloníki DevOps Meetup` on one line at 60px monospace bold. If the title text gets longer, drop the size or allow wrapping — don't let it run off the canvas. The safe content area is 1040px wide (1200 − 80px padding × 2).
 4. **Regenerate:**
    ```
    npm run gen:og
    ```
    Confirm the script logged `✓ wrote …/public/og-image.png` and that the file timestamp updated.
-5. **Spot-check the output** by reading `public/og-image.png` (it renders inline). Look for: title not clipped, all four text rows visible, vertical centering balanced.
-6. **If dimensions changed** (you changed the viewport or DPR in `scripts/generate-og-image.mjs`), update the matching meta tags in [src/pages/index.astro](src/pages/index.astro): `og:image:width` and `og:image:height`. The default is 2400 × 1260 (1200×630 logical × DPR 2).
-7. **Don't touch the SVG fallback** — there isn't one. The PNG is the only artifact.
+5. **Spot-check the output** by reading `public/og-image.png` (it renders inline). Look for: title not clipped, all rows visible, vertical centering balanced.
+6. **Simulate the LinkedIn small variant** before committing:
+   ```
+   magick public/og-image.png -resize 480x252 /tmp/og-480.png
+   ```
+   Then read `/tmp/og-480.png`. If any text row turns mushy/illegible at that size, the card is overloaded — see "Design for the 480px downscale" below.
+7. **If dimensions changed** (you changed the viewport or DPR in `scripts/generate-og-image.mjs`), update the matching meta tags in [src/pages/index.astro](src/pages/index.astro): `og:image:width` and `og:image:height`. The default is 2400 × 1260 (1200×630 logical × DPR 2).
+8. **Don't touch the SVG fallback** — there isn't one. The PNG is the only artifact.
+
+## Design for the 480px downscale
+
+LinkedIn (and several other surfaces — search results, sidebars, embedded shares) renders the OG card at 480×252 in compact contexts. Anything sourced from a 1200×630 canvas gets a 2.5× downscale on top of LinkedIn's re-encode. Body copy sized like real body copy disappears.
+
+**Rule of thumb**: at 480×252, every line of text should still be legible. The card is a **poster**, not a document.
+
+- Avoid multi-line descriptive paragraphs. One tagline is plenty.
+- Source text at **≥30px** for body, **≥28px** for chips/labels, **≥60px** for the title. Smaller than that and it becomes mush after the 2.5× downscale + LinkedIn's encoder.
+- Prefer high-contrast type colors (`var(--cream)` at ≥0.65 opacity) over the soft `0.4–0.55` greys you'd use on the real page — subtle tonality dies in compression.
+- Always run the `magick … -resize 480x252` check in step 6 before committing. The earlier iteration of this card included a 3-line description at 22px source size and turned to mush at 480px wide; that's the failure mode we're guarding against.
 
 ## Constraints worth knowing
 
