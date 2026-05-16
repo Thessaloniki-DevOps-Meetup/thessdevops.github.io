@@ -60,6 +60,11 @@ const yamlNav = `<span class="text-cream/40">---</span>
 
 <span class="text-accent">events</span><span class="text-cream/40">:</span>
 ${eventsNav}`;
+
+const pageTitle = siteConfig.name;
+const pageDescription = siteConfig.description || siteConfig.tagline || siteConfig.name;
+const ogImage = new URL('/og-image.png', Astro.site).href;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
@@ -67,9 +72,30 @@ ${eventsNav}`;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={siteConfig.description || siteConfig.name} />
+    <meta name="description" content={pageDescription} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{siteConfig.name}</title>
+    <link rel="canonical" href={pageUrl} />
+    <title>{pageTitle}</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={pageTitle} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2400" />
+    <meta property="og:image:height" content="1260" />
+    <meta property="og:image:alt" content={`${pageTitle} — ${siteConfig.tagline || ''}`.trim()} />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={`${pageTitle} — ${siteConfig.tagline || ''}`.trim()} />
     <style is:global>
       :root {
         --primary: #2d4a5e;

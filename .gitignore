@@ -25,6 +25,8 @@ scripts/*
 # … but track build-time scripts.
 !scripts/copy-event-assets.mjs
 !scripts/check-event-asset-links.mjs
+!scripts/generate-og-image.mjs
+!scripts/og-template.html
 
 # Event blobs are sourced from src/content/events/<NNN>/ and copied
 # into public/events/<NNN>/ by scripts/copy-event-assets.mjs.
