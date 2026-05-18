@@ -22,5 +22,9 @@ talks:
         url: "https://www.linkedin.com/in/pavlos-karakalidis/"
     description: "Ever shipped a distributed system only to realize you're flying blind in production? This talk challenges the notion that observability is just another tool you add at the end—it's a mindset that must be designed in from the start. Pavlos will cut through the fragmented landscape of proprietary APM agents and incompatible telemetry formats to show why OpenTelemetry has become the one instrumentation layer to rule them all. Through a (not so live) demo spanning EKS and Lambda, you'll see unified tracing, metrics, and logs across your entire stack."
     videoUrl: ""
-    slidesUrl: ""
+    slidesUrl: "https://docs.google.com/presentation/d/19uaVXA0k8T-36W9xrQHVryCYhXDhtDnWVsPih5jqhvE/edit?usp=sharing"
+    materials:
+      - type: repo
+        label: "Demo repo"
+        url: "https://github.com/pkarakal/aws-skg-meetup-otel-demo/"
 ---
