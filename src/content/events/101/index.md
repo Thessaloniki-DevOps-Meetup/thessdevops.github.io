@@ -7,7 +7,7 @@ locationUrl: "https://maps.app.goo.gl/d2A8cMUynZ2B6XCe7"
 meetupUrl: "https://www.meetup.com/thessaloniki-devops-meetup/events/316593090"
 description: "Season kick-off with beers and vibes!"
 image: ""
-draft: true
+draft: false
 talks:
   - title: "From DevOps to MLOps and LLMOps"
     speakers:
