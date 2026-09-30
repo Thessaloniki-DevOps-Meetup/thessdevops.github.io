@@ -5,7 +5,7 @@ date: 2026-10-01
 location: "OK!Thess"
 locationUrl: "https://maps.app.goo.gl/d2A8cMUynZ2B6XCe7"
 meetupUrl: "https://www.meetup.com/thessaloniki-devops-meetup/events/316593090"
-description: "Season kick-off with beers and vibes!"
+description: "Season kick-off: DevOps meets Data"
 image: ""
 draft: false
 talks:
