@@ -22,4 +22,12 @@ talks:
       Data Lineage, Compute Scheduling and Pipeline Orchestration.
     videoUrl: ""
     slidesUrl: ""
+- title: "Open-Source Stack for the Data Mesh"
+    speakers:
+      - name: "Ia Mgvdliashvili"
+        url: "https://www.linkedin.com/in/ia-mgvdliashvili-0b459768/"
+    description: |
+      Domain-driven transformation that defined the microservices movement, and later the Platform Engineering shift, is now happening in the Data Discipline. Having a federated mesh instead of a monolith warehouse allows teams to have more ownership, autonomy, and flexibility. After introducing different tools that bring Software Engineering practices to Data, I will share the open source stack that Canonical has chosen for its Data Mesh Architecture, and how the team deals with operational challenges that come with dozens of microservices.
+    videoUrl: ""
+    slidesUrl: ""
 ---
