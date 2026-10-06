@@ -41,4 +41,5 @@ talks:
       - type: slides
         label: "Slides"
         url: https://github.com/iyamg/slides/blob/1df6e3804d71d55a470206400a20562f83847d8e/2609-okthess-devops-data-mesh/presentation.html
+    slidesUrl: https://iyamg.github.io/slides/2609-okthess-devops-data-mesh/presentation.html?view=print#/title-slide
 ---
