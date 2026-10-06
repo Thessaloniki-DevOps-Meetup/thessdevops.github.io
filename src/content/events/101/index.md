@@ -20,8 +20,10 @@ talks:
       the technical principles encompassing the aforementioned and present a
       stub project — this means vibe-coded — that demonstrates concepts like
       Data Lineage, Compute Scheduling and Pipeline Orchestration.
-    videoUrl: ""
-    slidesUrl: ""
+    materials:
+      - type: slides
+        label: "Slides (PDF)"
+        url: /events/101/DevOps101.pdf
   - title: "Open-Source Stack for the Data Mesh"
     speakers:
       - name: "Ia Mgvdliashvili"
@@ -35,6 +37,8 @@ talks:
       source stack that Canonical has chosen for its Data Mesh Architecture, and how
       the team deals with operational challenges that come with dozens of
       microservices.
-    videoUrl: ""
-    slidesUrl: ""
+    materials:
+      - type: slides
+        label: "Slides"
+        url: https://github.com/iyamg/slides/blob/1df6e3804d71d55a470206400a20562f83847d8e/2609-okthess-devops-data-mesh/presentation.html
 ---
