@@ -24,6 +24,9 @@ talks:
       - type: slides
         label: "Slides (PDF)"
         url: /events/101/DevOps101.pdf
+      - type: video
+        label: "YouTube"
+        url: https://www.youtube.com/watch?v=CA8sf4wsWdM
   - title: "Open-Source Stack for the Data Mesh"
     speakers:
       - name: "Ia Mgvdliashvili"
@@ -39,4 +42,8 @@ talks:
       microservices.
     # Source (pinned commit): https://github.com/iyamg/slides/blob/1df6e3804d71d55a470206400a20562f83847d8e/2609-okthess-devops-data-mesh/presentation.html
     slidesUrl: https://iyamg.github.io/slides/2609-okthess-devops-data-mesh/presentation.html?view=print#/title-slide
+    materials:
+      - type: video
+        label: "YouTube"
+        url: https://www.youtube.com/watch?v=H-Lo_RHSEm0
 ---
