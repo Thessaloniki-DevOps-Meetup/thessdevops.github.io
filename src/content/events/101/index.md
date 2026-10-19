@@ -40,10 +40,12 @@ talks:
       source stack that Canonical has chosen for its Data Mesh Architecture, and how
       the team deals with operational challenges that come with dozens of
       microservices.
-    # Source (pinned commit): https://github.com/iyamg/slides/blob/1df6e3804d71d55a470206400a20562f83847d8e/2609-okthess-devops-data-mesh/presentation.html
-    slidesUrl: https://iyamg.github.io/slides/2609-okthess-devops-data-mesh/presentation.html?view=print#/title-slide
     materials:
       - type: video
         label: "YouTube"
         url: https://www.youtube.com/watch?v=H-Lo_RHSEm0
+      - type: slides
+        label: "Slides (Web)"
+        # Source (pinned commit): https://github.com/iyamg/slides/blob/1df6e3804d71d55a470206400a20562f83847d8e/2609-okthess-devops-data-mesh/presentation.html
+        url: https://iyamg.github.io/slides/2609-okthess-devops-data-mesh/presentation.html?view=print#/title-slide
 ---
