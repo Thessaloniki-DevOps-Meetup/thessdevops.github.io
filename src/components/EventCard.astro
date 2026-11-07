@@ -104,7 +104,7 @@ const statusTone = status === 'next'
 
       <h2 class="text-2xl md:text-3xl lg:text-3xl font-bold leading-tight">{event.frontmatter.title}</h2>
 
-      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs lg:text-sm text-cream/60 mt-2">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-cream/60 mt-2">
         <span>{formatDateLong(event.frontmatter.date)}</span>
         {event.frontmatter.location && (
           <>
@@ -136,7 +136,7 @@ const statusTone = status === 'next'
               <div class="border-l-2 border-cream/15 hover:border-accent/50 transition-colors pl-4 py-0.5">
                 <div class="text-sm lg:text-base font-semibold text-cream">{talk.title}</div>
                 {talk.speakers && talk.speakers.length > 0 && (
-                  <div class="text-xs text-cream/55 mt-0.5">
+                  <div class="text-sm lg:text-xs text-cream/55 mt-0.5">
                     by {talk.speakers.map((s, i) => (
                       <>
                         {i > 0 && ', '}
@@ -148,13 +148,13 @@ const statusTone = status === 'next'
                   </div>
                 )}
                 {talk.description && (
-                  <p class="text-xs lg:text-sm text-cream/65 mt-2 leading-relaxed">{talk.description}</p>
+                  <p class="text-sm text-cream/65 mt-2 leading-relaxed">{talk.description}</p>
                 )}
                 {materials.length > 0 && (
                   <div class="flex flex-wrap gap-1.5 mt-2.5">
                     {materials.map((m) => (
                       <a href={m.url} target="_blank" rel="noopener noreferrer"
-                         class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] border border-cream/20 text-cream/80 hover:text-accent hover:border-accent rounded-sm transition-colors">
+                         class="inline-flex items-center gap-1 px-2 py-0.5 text-xs lg:text-[11px] border border-cream/20 text-cream/80 hover:text-accent hover:border-accent rounded-sm transition-colors">
                         <span aria-hidden="true">{glyph(m.type)}</span>
                         <span>{labelFor(m)}</span>
                       </a>

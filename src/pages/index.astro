@@ -41,7 +41,7 @@ const pastInline = pastEvents.slice(0, PAST_INLINE);
 const pastFolded = pastEvents.slice(PAST_INLINE);
 
 const foldedBlock = pastFolded.length > 0
-  ? `<details class="nav-fold"><summary class="cursor-pointer list-none"><span class="text-cream/40 hover:text-accent transition-colors">      <span class="nav-fold-show"># ${pastFolded.length} more ▸</span><span class="nav-fold-hide"># collapse ▴</span></span></summary>${pastFolded.map((e) => '\n' + buildEventNav(e)).join('')}</details>`
+  ? `<details class="nav-fold"><summary class="cursor-pointer list-none"><span class="text-cream/40 hover:text-accent transition-colors">      # ${pastFolded.length} more ▸</span></summary>${pastFolded.map((e) => '\n' + buildEventNav(e)).join('')}\n<button type="button" class="nav-fold-close text-cream/40 hover:text-accent transition-colors">      # collapse ▴</button></details>`
   : '';
 
 const pastNav = pastEvents.length > 0
@@ -54,10 +54,6 @@ const pastNav = pastEvents.length > 0
 const eventsNav = [upcomingNav, pastNav].filter(Boolean).join('\n');
 
 const yamlNav = `<span class="text-cream/40">---</span>
-<span class="text-accent">site</span><span class="text-cream/40">:</span>
-  <span class="text-blue-gray">name</span><span class="text-cream/40">:</span> <span class="text-cream">"${siteConfig.name}"</span>
-  <span class="text-blue-gray">tagline</span><span class="text-cream/40">:</span> <span class="text-cream">"${siteConfig.tagline || '~'}"</span>
-
 <span class="text-accent">events</span><span class="text-cream/40">:</span>
 ${eventsNav}`;
 
@@ -118,9 +114,8 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       .nav-fold summary { display: block; }
       .nav-fold summary::-webkit-details-marker { display: none; }
       .nav-fold summary::marker { content: ''; }
-      .nav-fold .nav-fold-hide { display: none; }
-      .nav-fold[open] .nav-fold-show { display: none; }
-      .nav-fold[open] .nav-fold-hide { display: inline; }
+      .nav-fold[open] > summary { display: none; }
+      .nav-fold-close { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
     </style>
   </head>
   <body class="bg-primary text-cream font-mono antialiased">
@@ -136,13 +131,13 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       <!-- DESKTOP-ONLY: left aside with about (top) + nav (bottom) -->
       <aside class="hidden lg:flex lg:w-2/5 lg:h-screen lg:sticky lg:top-0 lg:self-start lg:flex-col lg:border-r lg:border-cream/15 bg-primary">
         <!-- about.md -->
-        <section class="flex-1 overflow-auto px-9 py-8 border-b border-cream/15">
+        <section class="flex-[55] min-h-0 overflow-auto px-9 py-8 border-b border-cream/15">
           <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
           <Hero />
         </section>
 
         <!-- nav.yaml -->
-        <section class="flex-1 overflow-auto px-9 py-8">
+        <section class="flex-[45] min-h-0 overflow-auto px-9 py-8">
           <div class="text-[11px] tracking-widest text-cream/35 mb-4"># nav.yaml</div>
           <NavYaml yamlNav={yamlNav} />
         </section>
@@ -210,6 +205,16 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
         const target = Math.max(0, Math.min(events.length - 1, here + delta));
         events[target].scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
+
+      document.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement | null)?.closest('.nav-fold-close');
+        if (!btn) return;
+        const details = btn.closest('details');
+        if (details) {
+          details.open = false;
+          details.scrollIntoView({ block: 'nearest' });
+        }
+      });
 
       document.addEventListener('keydown', (e) => {
         const t = e.target as HTMLElement | null;
