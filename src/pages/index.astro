@@ -54,10 +54,6 @@ const pastNav = pastEvents.length > 0
 const eventsNav = [upcomingNav, pastNav].filter(Boolean).join('\n');
 
 const yamlNav = `<span class="text-cream/40">---</span>
-<span class="text-accent">site</span><span class="text-cream/40">:</span>
-  <span class="text-blue-gray">name</span><span class="text-cream/40">:</span> <span class="text-cream">"${siteConfig.name}"</span>
-  <span class="text-blue-gray">tagline</span><span class="text-cream/40">:</span> <span class="text-cream">"${siteConfig.tagline || '~'}"</span>
-
 <span class="text-accent">events</span><span class="text-cream/40">:</span>
 ${eventsNav}`;
 
@@ -136,13 +132,13 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       <!-- DESKTOP-ONLY: left aside with about (top) + nav (bottom) -->
       <aside class="hidden lg:flex lg:w-2/5 lg:h-screen lg:sticky lg:top-0 lg:self-start lg:flex-col lg:border-r lg:border-cream/15 bg-primary">
         <!-- about.md -->
-        <section class="flex-1 overflow-auto px-9 py-8 border-b border-cream/15">
+        <section class="flex-[3] min-h-0 overflow-auto px-9 py-8 border-b border-cream/15">
           <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
           <Hero />
         </section>
 
         <!-- nav.yaml -->
-        <section class="flex-1 overflow-auto px-9 py-8">
+        <section class="flex-[2] min-h-0 overflow-auto px-9 py-8">
           <div class="text-[11px] tracking-widest text-cream/35 mb-4"># nav.yaml</div>
           <NavYaml yamlNav={yamlNav} />
         </section>
