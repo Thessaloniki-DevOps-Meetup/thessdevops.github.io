@@ -1,0 +1,180 @@
+---
+import siteConfig from '../content/site.json';
+import talks from '../content/talks.json';
+
+const pageTitle = `Submit a talk — ${siteConfig.name}`;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og-image.png', Astro.site).href;
+
+const input =
+  'w-full bg-transparent border border-cream/30 rounded-sm px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-accent';
+const label = 'block text-xs tracking-widest text-cream/60 mb-1.5';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Propose a talk for the Thessaloníki DevOps Meetup." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={pageUrl} />
+    <title>{pageTitle}</title>
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:image" content={ogImage} />
+    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  </head>
+  <body class="bg-primary text-cream font-mono antialiased">
+    <main class="max-w-xl mx-auto px-6 py-10">
+      <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← {siteConfig.name}</a>
+
+      <div class="text-[11px] tracking-widest text-cream/35 mt-8 mb-3"># submit-talk.md</div>
+      <h1 class="text-2xl font-bold mb-2">Submit a talk</h1>
+      <p class="text-sm text-cream/65 leading-relaxed mb-8">
+        Beginners and first-timers welcome. Tell us what you'd like to talk about and an organiser will get back to you.
+      </p>
+
+      <form id="talk-form" novalidate class="space-y-5">
+        <div>
+          <label class={label} for="name">NAME</label>
+          <input class={input} id="name" name="name" type="text" maxlength="100" required autocomplete="name" />
+          <p class="err text-xs text-accent mt-1" data-for="name"></p>
+        </div>
+
+        <div>
+          <label class={label} for="email">EMAIL</label>
+          <input class={input} id="email" name="email" type="email" maxlength="200" required autocomplete="email" />
+          <p class="err text-xs text-accent mt-1" data-for="email"></p>
+        </div>
+
+        <div>
+          <label class={label} for="title">TALK TITLE</label>
+          <input class={input} id="title" name="title" type="text" maxlength="150" required />
+          <p class="err text-xs text-accent mt-1" data-for="title"></p>
+        </div>
+
+        <div>
+          <label class={label} for="abstract">ABSTRACT</label>
+          <textarea class={input} id="abstract" name="abstract" rows="6" maxlength="3000" required></textarea>
+          <p class="err text-xs text-accent mt-1" data-for="abstract"></p>
+        </div>
+
+        <div>
+          <label class={label} for="duration">LENGTH</label>
+          <select class={input} id="duration" name="duration" required>
+            <option value="20" class="text-primary">20 minutes</option>
+            <option value="40" class="text-primary">40 minutes</option>
+          </select>
+          <p class="err text-xs text-accent mt-1" data-for="duration"></p>
+        </div>
+
+        <div>
+          <label class={label} for="bio">SHORT BIO</label>
+          <textarea class={input} id="bio" name="bio" rows="3" maxlength="1000" required></textarea>
+          <p class="err text-xs text-accent mt-1" data-for="bio"></p>
+        </div>
+
+        <div>
+          <label class={label} for="links">LINKS (OPTIONAL)</label>
+          <input class={input} id="links" name="links" type="text" maxlength="500" placeholder="Slides, repo, previous talks…" />
+          <p class="err text-xs text-accent mt-1" data-for="links"></p>
+        </div>
+
+        <label class="flex items-start gap-2 text-sm text-cream/75">
+          <input type="checkbox" id="firstTime" name="firstTime" class="mt-1 accent-[#e07a5f]" />
+          This would be my first talk
+        </label>
+
+        <!-- Honeypot: hidden from people, tempting to bots. -->
+        <div class="absolute -left-[9999px]" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div>
+          <label class="flex items-start gap-2 text-sm text-cream/75">
+            <input type="checkbox" id="consent" name="consent" class="mt-1 accent-[#e07a5f]" />
+            <span>
+              I agree that the organisers store these details and contact me about my submission.
+              Submissions are deleted after 12 months, or sooner if you ask.
+            </span>
+          </label>
+          <p class="err text-xs text-accent mt-1" data-for="consent"></p>
+        </div>
+
+        <div class="cf-turnstile" data-sitekey={talks.turnstileSiteKey} data-theme="dark"></div>
+
+        <button
+          id="submit"
+          type="submit"
+          class="inline-flex items-center gap-1.5 px-4 py-2 text-sm bg-accent text-primary font-semibold rounded-sm hover:bg-cream transition-colors disabled:opacity-50"
+        >
+          Submit talk →
+        </button>
+        <p id="status" role="status" class="text-sm"></p>
+      </form>
+    </main>
+
+    <script is:inline define:vars={{ api: talks.api }}>
+      const form = document.getElementById('talk-form');
+      const statusEl = document.getElementById('status');
+      const button = document.getElementById('submit');
+
+      const showErrors = (errors) => {
+        document.querySelectorAll('.err').forEach((el) => {
+          el.textContent = errors[el.dataset.for] || '';
+        });
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showErrors({});
+        statusEl.textContent = '';
+        statusEl.className = 'text-sm';
+
+        const data = Object.fromEntries(new FormData(form));
+        const payload = {
+          name: data.name,
+          email: data.email,
+          title: data.title,
+          abstract: data.abstract,
+          duration: data.duration,
+          bio: data.bio,
+          links: data.links,
+          firstTime: form.firstTime.checked,
+          consent: form.consent.checked,
+          website: data.website,
+          turnstileToken: data['cf-turnstile-response'],
+        };
+
+        button.disabled = true;
+        try {
+          const res = await fetch(api, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const body = await res.json().catch(() => ({}));
+          if (res.ok) {
+            form.reset();
+            statusEl.textContent = 'Thanks! Check your inbox for a confirmation. An organiser will be in touch.';
+            statusEl.classList.add('text-cream');
+          } else if (res.status === 422 && body.errors) {
+            showErrors(body.errors);
+            statusEl.textContent = 'Please fix the highlighted fields.';
+            statusEl.classList.add('text-accent');
+          } else {
+            statusEl.textContent = body.error || 'Something went wrong. Please try again.';
+            statusEl.classList.add('text-accent');
+          }
+        } catch {
+          statusEl.textContent = 'Network error. Please try again.';
+          statusEl.classList.add('text-accent');
+        } finally {
+          button.disabled = false;
+          if (window.turnstile) window.turnstile.reset();
+        }
+      });
+    </script>
+  </body>
+</html>
