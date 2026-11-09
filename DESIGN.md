@@ -35,18 +35,46 @@ Container/port/harbor aesthetic:
 
 ## Layout
 
-**Single-page design** with two full-height panels:
+**Two-panel shell, multiple pages.** Every main page uses
+`src/layouts/BaseLayout.astro`:
 
 | Panel | Content |
 |-------|--------------------------------------|
-| Left (50%) | YAML-style navigation with syntax highlighting |
-| Right (50%) | Scrollable content sections |
+| Left (40%, sticky, desktop) | `# about.md` hero + `# nav.yaml` YAML-style navigation |
+| Right (60%) | The page's content |
 
-### Sections (anchor-based navigation)
-- `#home` — General info about the meetup
-- `#events` — Events archive with all events listed
-- `#event-{number}` — Jump to specific event (e.g., `#event-1`)
-- `#contact` — Contact details and social links
+On mobile the about block sits on top (home page only), the content
+follows, and the nav is at the bottom behind a sticky `# nav.yaml` bar.
+
+### Pages
+- `/` — Home: `# next.md` (next upcoming meetup, or "TBA — follow on
+  Meetup"), `# latest.md` (the 3 most recent past meetups as clickable
+  summaries: title, description, talk titles), `# archive.md` (older
+  meetups, one line each).
+- `/events/<folder>/` — One page per event: full details, talks,
+  materials, markdown body, photo gallery, previous/next links.
+  Old `/#event-<number>` links redirect here.
+- `/submit-talk/` — Talk submission form.
+- `/about/`, `/media/`, `/sponsors/` — Extra pages in `src/site-pages/`,
+  listed in `src/content/pages.json`. **Draft** pages (`"draft": true`)
+  are only routed in `astro dev` or with `SHOW_DRAFTS=1` (via the
+  `site-pages` integration in `astro.config.mjs`); they show a DRAFT
+  banner, `# draft` in the nav and `noindex`.
+- `/404.html` — "incident report" style not-found page.
+- `/sitemap.xml`, `/robots.txt` — generated endpoints (no plugin).
+
+The nav lists pages as files (`pages: - index.md - about.md …`) above the
+`events:` tree. Upcoming events from the Meetup feed that have no event
+folder yet appear in lists and nav with a `↗` link to Meetup.
+
+### Link previews
+Every page has Open Graph/Twitter tags. Event pages and extra pages get
+a generated 2400×1260 PNG (`src/lib/og.ts`): an SVG drawn like the
+site's terminal-window card, rasterised with `sharp` at build time. The
+home page uses the hand-made `public/og-image.png`.
+
+Section labels use the file-name style (`# next.md`, `# photos/`) to
+keep the terminal aesthetic.
 
 ### YAML Navigation Syntax Colors
 - **Keys (top-level):** Accent coral (`#e07a5f`)
@@ -58,11 +86,15 @@ Container/port/harbor aesthetic:
 ## Directory Structure
 
 Each event lives in its own directory under `src/content/events/`. The
-event's markdown is `index.md`; sibling files (notes, source for slides,
-PDFs that are too big for `public/`) can live next to it. Assets that
-need a public URL (linked from `slidesUrl` / `videoUrl` / `materials`)
-go under `public/events/NNN/` and are referenced with root-relative
-paths (e.g. `/events/003/observability.pdf`).
+event's markdown is `index.md`. Any other file next to it (PDF, PPTX,
+image…) is copied to `public/events/NNN/` by
+`scripts/copy-event-assets.mjs` before dev/build, and referenced with a
+root-relative path (e.g. `/events/003/observability.pdf`). That is the
+same URL folder as the event's page (`/events/003/`).
+
+Photos go in a `photos/` subfolder. They are *not* copied as-is: they
+are imported through Astro's image pipeline (`astro:assets`) and
+rendered as resized WebP by `PhotoGallery.astro`.
 
 ```
 /src
@@ -77,25 +109,39 @@ paths (e.g. `/events/003/observability.pdf`).
         index.md
       /003
         index.md
+        observability.pdf           # → /events/003/observability.pdf
         notes.md                    # (optional) extra notes — not auto-rendered
+        /photos                     # (optional) gallery on /events/003/
+          01.jpg
   /components
-    EventCard.astro                 # Reused per-event card
+    EventCard.astro                 # Full event (event page)
+    EventSummary.astro              # Compact clickable card (home)
+    UpcomingBlock.astro             # Next meetup block (home)
+    PhotoGallery.astro              # Photo grid + lightbox (event page)
+  /layouts
+    BaseLayout.astro                # <head> + two-panel shell
+  /lib
+    events.ts                       # Event/photo loading, formatting, nav
   /pages
-    index.astro                     # Single-page app
+    index.astro                     # Home
+    /events/[slug].astro            # /events/<folder>/
+    submit-talk.astro
 /public
   favicon.svg
-  /events
-    /003
-      observability.pdf             # Referenced as /events/003/observability.pdf
-      hero.jpg                      # Referenced as /events/003/hero.jpg
+  /events                           # Generated from src/content/events (gitignored)
 ```
 
-Event lookup uses the glob `src/content/events/**/*.md` and filters
-on `frontmatter.number > 0 && !draft`, so the template (number 0,
-draft) is silently skipped. Files without a `number` (notes, READMEs)
-are also ignored — keep those next to `index.md` freely.
+Event lookup (`src/lib/events.ts`) uses the glob
+`src/content/events/*/index.md` and filters on
+`frontmatter.number > 0 && !draft`, so the template (number 0, draft)
+is silently skipped. Other markdown files (notes, READMEs) next to
+`index.md` are ignored.
 
 ## Content Schema
+
+Event frontmatter is validated on every build by a zod schema in
+`src/lib/events.ts` (unknown keys, bad dates/URLs, missing titles,
+duplicate numbers or Meetup URLs fail the build with a list of problems).
 
 ### Site Configuration (`src/content/site.json`)
 
@@ -104,7 +150,8 @@ are also ignored — keep those next to `index.md` freely.
   "name": "DevOps Thessaloníki",
   "tagline": "",
   "description": "",
-  "email": "",
+  "email": "",          // main contact; the hero links to it (mailto)
+  "emailCc": [],        // optional: addresses cc'd on that mailto link
   "meetupUrl": "",
   "socials": {
     "discord": "",
@@ -121,6 +168,7 @@ are also ignored — keep those next to `index.md` freely.
 number: 1
 title: "Meetup #001"
 date: 2025-01-15              # YYYY-MM-DD format
+time: "19:00–22:00"           # Optional, Athens time (filled from the Meetup feed if empty)
 location: ""
 locationUrl: ""               # Optional: Google Maps link
 meetupUrl: ""                 # Link to this event on meetup.com
@@ -164,10 +212,12 @@ sponsor mentions. Rendered inline under the event card.
 2. **Blank slate:** No placeholder or fake content. Empty state until real content is added.
 3. **Minimal:** Clean, technical aesthetic. No unnecessary decoration.
 4. **Portable:** Pure static output, deployable anywhere.
-5. **Single-page:** All content on one page with anchor navigation and smooth scrolling.
+5. **Few, focused pages:** Home is an overview (next meetup + latest); details live on each event's page. Same two-panel shell everywhere.
 6. **Terminal aesthetic:** YAML-like syntax highlighting for navigation, monospace font.
 
 ## Event Numbering Convention
 
 Events use `#001`, `#002`, etc. format as shown in official slides/branding.
-File names match: `001.md`, `002.md`, etc.
+Folders are named after the event (`001/`, `101/`…) and the folder name is
+the page URL (`/events/101/`). The `number` field is the sequential card
+tag. (The numbering scheme is under discussion.)
