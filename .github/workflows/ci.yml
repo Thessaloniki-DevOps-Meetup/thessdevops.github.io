@@ -32,5 +32,5 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Check event asset links
+      - name: Check internal links
         run: npm run check:links

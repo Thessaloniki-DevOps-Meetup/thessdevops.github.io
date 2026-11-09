@@ -81,6 +81,7 @@ The site will be available at `http://localhost:4321`
 | `npm run dev`     | Start dev server at `localhost:4321`     |
 | `npm run build`   | Build production site to `./dist/`       |
 | `npm run preview` | Preview build locally before deploying   |
+| `npm run check`   | Build + check every internal link works  |
 
 Both `dev` and `build` run `scripts/copy-event-assets.mjs` first to
 sync per-event blobs from `src/content/events/<NNN>/` into
@@ -149,6 +150,22 @@ Optional markdown body — recap, photos, attendee notes.
 ```
 
 Set `draft: true` to hide an event from the site.
+
+### Content checks
+
+Every build (and `npm run dev`) validates the event files: required
+fields (`number`, `title`, `date`), date format (`YYYY-MM-DD`), URLs,
+misspelt keys (e.g. `slideUrl:`), and duplicate `number`s or Meetup
+links. Problems fail the build with a list like:
+
+```
+Invalid event content:
+  src/content/events/006/index.md → date: must be a date like 2026-12-17 (YYYY-MM-DD)
+```
+
+`npm run check` (also run in CI) then checks that every internal link in
+the built site points to a real page or file, e.g. a slides PDF that was
+forgotten or a mistyped `/submit-talk` link.
 
 ## Editing the site config
 
