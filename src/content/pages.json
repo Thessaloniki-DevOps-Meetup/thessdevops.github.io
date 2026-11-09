@@ -1,0 +1,17 @@
+{
+  "about": {
+    "title": "About us",
+    "description": "Who we are: the story of the Thessaloníki DevOps Meetup, who it's for, and the people organising it.",
+    "draft": true
+  },
+  "media": {
+    "title": "Media",
+    "description": "Recordings and photos from the Thessaloníki DevOps Meetup.",
+    "draft": true
+  },
+  "sponsors": {
+    "title": "Sponsors & hosts",
+    "description": "Support the Thessaloníki DevOps Meetup: host an event, sponsor pizza and drinks, and meet the local DevOps community.",
+    "draft": true
+  }
+}

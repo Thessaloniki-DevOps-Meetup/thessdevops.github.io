@@ -1,0 +1,79 @@
+---
+// /media — DRAFT until there are enough recordings. Videos (from talk
+// materials) and photos (from events/<NNN>/photos/), grouped by event.
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import VideoThumb from '../components/VideoThumb.astro';
+import siteConfig from '../content/site.json';
+import { getPage } from '../lib/pages';
+import { formatDateLong, getEventPhotos, getEventVideos, getPublishedEvents, splitEvents } from '../lib/events';
+
+const page = getPage('media');
+const { past } = splitEvents(getPublishedEvents());
+
+const withVideos = past.map((e) => ({ event: e, videos: getEventVideos(e) })).filter((x) => x.videos.length > 0);
+const withPhotos = past.map((e) => ({ event: e, photos: getEventPhotos(e.slug) })).filter((x) => x.photos.length > 0);
+const videoCount = withVideos.reduce((n, x) => n + x.videos.length, 0);
+
+const section = 'px-6 py-10 md:px-10 lg:px-14 border-t border-cream/10';
+const label = 'text-[11px] tracking-widest text-cream/35 mb-5';
+---
+
+<BaseLayout title={page.title} description={page.description} currentPage="media" mobileHero={false}
+            draft={page.draft} ogImage="/og/media.png">
+  <PageHeader file="media.md" title="Recordings & photos"
+              lead="Talks from past meetups, and a few photos from the evenings.">
+    {siteConfig.socials.youtube && (
+      <a href={siteConfig.socials.youtube} target="_blank" rel="noopener noreferrer"
+         class="inline-flex items-center mt-5 px-3 py-2 text-sm border border-cream/30 text-cream hover:border-accent hover:text-accent transition-colors rounded-sm">
+        Subscribe on YouTube ↗
+      </a>
+    )}
+  </PageHeader>
+
+  <section class={`${section} mt-8`}>
+    <div class={label}># videos/ <span class="text-cream/25">({videoCount})</span></div>
+    {withVideos.length === 0 ? (
+      <p class="text-cream/55">No recordings yet.</p>
+    ) : (
+      <div class="space-y-10">
+        {withVideos.map(({ event, videos }) => (
+          <div>
+            <a href={event.url} class="group inline-flex items-baseline gap-3 mb-4">
+              <span class="text-lg font-bold group-hover:text-accent transition-colors">{event.frontmatter.title}</span>
+              <span class="text-xs text-cream/50">{formatDateLong(event.frontmatter.date)}</span>
+            </a>
+            <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {videos.map((v) => <VideoThumb id={v.id} url={v.url} title={v.talkTitle} subtitle={v.speakers} caption />)}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class={section}>
+    <div class={label}># photos/</div>
+    {withPhotos.length === 0 ? (
+      <p class="text-cream/55">No photos yet. Drop a few into <code class="text-cream/80">src/content/events/&lt;NNN&gt;/photos/</code>.</p>
+    ) : (
+      <div class="space-y-10">
+        {withPhotos.map(({ event, photos }) => (
+          <div>
+            <a href={event.url} class="group inline-flex items-baseline gap-3 mb-4">
+              <span class="text-lg font-bold group-hover:text-accent transition-colors">{event.frontmatter.title}</span>
+              <span class="text-xs text-cream/50">{photos.length} photo{photos.length === 1 ? '' : 's'} →</span>
+            </a>
+            <a href={event.url} class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {photos.slice(0, 4).map((p, i) => (
+                <Image src={p.src} alt={`${event.frontmatter.title}, photo ${i + 1}`} widths={[300, 600]} sizes="25vw"
+                       class="w-full aspect-[4/3] object-cover rounded-sm border border-cream/10" loading="lazy" />
+              ))}
+            </a>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+</BaseLayout>

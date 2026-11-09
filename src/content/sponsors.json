@@ -1,0 +1,26 @@
+[
+  {
+    "name": "OK!Thess",
+    "kind": "host",
+    "url": "https://okthess.gr/",
+    "logo": "okthess.png",
+    "venue": "OK!Thess",
+    "note": "Thessaloníki's innovation & entrepreneurship hub, and our usual home."
+  },
+  {
+    "name": "Rational Data",
+    "kind": "host",
+    "url": "https://rationaldata.dev/",
+    "logo": "rational-data.svg",
+    "venue": "Rational Data",
+    "note": "Where it all started: our première and the summer wrap-up."
+  },
+  {
+    "name": "BetAdvanced",
+    "kind": "sponsor",
+    "url": "https://www.betadvanced.com/",
+    "logo": "betadvanced.svg",
+    "note": "Kept us fed: BetAdvanced sponsored the pizza at our meetups, up to and including Meetup #101.",
+    "contribution": "Pizza"
+  }
+]

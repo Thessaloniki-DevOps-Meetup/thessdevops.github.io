@@ -1,0 +1,147 @@
+---
+// /about — DRAFT. Story, who it's for, organizers.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Todo from '../components/Todo.astro';
+import siteConfig from '../content/site.json';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import organizers from '../content/organizers.json';
+import { getPage } from '../lib/pages';
+import { formatDateLong, getPublishedEvents, splitEvents } from '../lib/events';
+
+const page = getPage('about');
+const { past } = splitEvents(getPublishedEvents());
+const first = past.at(-1);
+
+// Numbers come from the event files, so they stay true as events are added.
+const talks = past.flatMap((e) => e.frontmatter.talks ?? []);
+const speakers = new Set(talks.flatMap((t) => (t.speakers ?? []).map((s) => s.name)));
+const venues = [...new Set(past.map((e) => e.frontmatter.location).filter(Boolean))];
+
+const stats = [
+  { n: past.length, label: past.length === 1 ? 'meetup' : 'meetups' },
+  { n: talks.length, label: 'talks' },
+  { n: speakers.size, label: 'speakers' },
+  { n: venues.length, label: venues.length === 1 ? 'venue' : 'venues' },
+];
+
+// Organizer photos live in src/assets/organizers/ and are resized at build.
+const photos = import.meta.glob<{ default: ImageMetadata }>('../assets/organizers/*', { eager: true });
+const photoFor = (file?: string) => (file ? photos[`../assets/organizers/${file}`]?.default : undefined);
+
+const initials = (name: string) => name.split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+const section = 'px-6 py-10 md:px-10 lg:px-14 border-t border-cream/10';
+const label = 'text-[11px] tracking-widest text-cream/35 mb-4';
+const para = 'text-sm lg:text-base text-cream/75 leading-relaxed max-w-2xl';
+---
+
+<BaseLayout title={page.title} description={page.description} currentPage="about" mobileHero={false}
+            draft={page.draft} ogImage="/og/about.png">
+  <PageHeader file="about.md" title="About us" lead={siteConfig.description} />
+
+  <!-- Numbers -->
+  <section class="px-6 py-8 md:px-10 lg:px-14">
+    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
+      {stats.map((s) => (
+        <div class="border border-cream/15 rounded-sm px-4 py-3">
+          <dt class="sr-only">{s.label}</dt>
+          <dd><span class="block text-2xl font-bold">{s.n}</span><span class="text-xs tracking-widest text-cream/55">{s.label}</span></dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <!-- Story -->
+  <section class={section}>
+    <div class={label}># story.md</div>
+    <div class="space-y-4">
+      <p class={para}>
+        Thessaloníki didn't have a DevOps community event, so <span class="text-cream">Dimitris</span> started one.
+        {first && (
+          <>
+            So on <span class="text-cream">{formatDateLong(first.frontmatter.date)}</span> we ran our première at
+            <span class="text-cream">{first.frontmatter.location}</span>: two talks, a room full of people we hadn't met yet,
+            and a lot of pizza.
+          </>
+        )}
+      </p>
+      <p class={para}>
+        Since then we meet every month or two, mostly at <span class="text-cream">OK!Thess</span>.
+        Each meetup has a couple of talks from people doing the work: platform and cloud teams, SREs, data
+        engineers, game studios. Then we hang around and talk shop. Before the summer we
+        wrap up the season with a social night: no slides, just beers.
+      </p>
+      <p class={para}><Todo>Check the story wording; add how/why it started and anything we're proud of.</Todo></p>
+    </div>
+  </section>
+
+  <!-- Who it's for -->
+  <section class={section}>
+    <div class={label}># who-is-it-for.yaml</div>
+    <ul class="space-y-2 max-w-2xl text-sm lg:text-base">
+      <li class="flex gap-3">
+        <span class="text-blue-gray shrink-0">everyone<span class="text-cream/40">:</span></span>
+        <span class="text-cream/75">From Kubernetes at scale to a home-brewed Raspberry Pi cluster: if you build, ship or run software, you belong here.</span>
+      </li>
+      <li class="flex gap-3">
+        <span class="text-blue-gray shrink-0">beginners<span class="text-cream/40">:</span></span>
+        <span class="text-cream/75">New to DevOps? Come and listen. Questions are the point.</span>
+      </li>
+      <li class="flex gap-3">
+        <span class="text-blue-gray shrink-0">first-time speakers<span class="text-cream/40">:</span></span>
+        <span class="text-cream/75">
+          Never given a talk?
+          <a href="/submit-talk/" class="text-accent hover:text-cream underline underline-offset-2 transition-colors">We will help you shape it.</a>
+          Fireside stories count too.
+        </span>
+      </li>
+      <li class="flex gap-3">
+        <span class="text-blue-gray shrink-0">diy spirit<span class="text-cream/40">:</span></span>
+        <span class="text-cream/75">Hands-on, practical, vendor-neutral. Show us what you built and what broke.</span>
+      </li>
+    </ul>
+    <div class="flex flex-wrap gap-2 mt-6">
+      {siteConfig.socials.meetup && (
+        <a href={siteConfig.socials.meetup} target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center px-3 py-2 text-sm bg-accent text-primary font-semibold rounded-sm hover:bg-cream transition-colors">Join on Meetup →</a>
+      )}
+      <a href="/submit-talk/" class="inline-flex items-center px-3 py-2 text-sm border border-accent text-accent hover:bg-accent hover:text-primary transition-colors rounded-sm">Submit a talk</a>
+    </div>
+  </section>
+
+  <!-- Organizers -->
+  <section class={section} id="organizers">
+    <div class={label}># organizers/</div>
+    <ul class="grid sm:grid-cols-2 gap-4 max-w-3xl">
+      {organizers.map((o) => {
+        const photo = photoFor(o.photo);
+        return (
+        <li class="border border-cream/15 rounded-md p-5 bg-cream/[0.02]">
+          <div class="flex items-center gap-4">
+            {photo ? (
+              <Image src={photo} alt={o.name} width={128} height={128}
+                     class="w-16 h-16 shrink-0 rounded-full object-cover border border-cream/20" />
+            ) : (
+              <span class="w-16 h-16 rounded-full flex items-center justify-center bg-accent/15 border border-accent/40 text-accent font-bold text-lg" aria-hidden="true">
+                {initials(o.name)}
+              </span>
+            )}
+            <div class="min-w-0">
+              <div class="font-bold text-lg leading-tight">{o.name}</div>
+              <div class="text-sm text-cream/55">{o.role}</div>
+            </div>
+          </div>
+          {o.bio && <p class="text-sm text-cream/70 mt-4 leading-relaxed">{o.bio}</p>}
+          <div class="flex flex-wrap gap-1.5 mt-4">
+            {Object.entries(o.links).filter(([, url]) => url).map(([kind, url]) => (
+              <a href={url} target="_blank" rel="noopener noreferrer"
+                 class="inline-flex items-center px-2 py-0.5 text-xs border border-cream/20 text-cream/80 hover:text-accent hover:border-accent rounded-sm transition-colors">{kind} ↗</a>
+            ))}
+          </div>
+        </li>
+        );
+      })}
+    </ul>
+  </section>
+</BaseLayout>

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Dimitris Verraros",
+    "short": "Dimi",
+    "role": "Founder & organizer",
+    "bio": "Started the meetup in October 2025. Platform engineer and founder of seastar consulting, which builds development, data and ML infrastructure. Has built services and infrastructure for everything from Berlin startups to the team behind Persona for the Apple Vision Pro. Tech and music nerd.",
+    "photo": "dimi.jpg",
+    "links": {
+      "linkedin": "https://www.linkedin.com/in/vervas/",
+      "github": "https://github.com/vervas",
+      "website": "https://seastar.consulting/"
+    }
+  },
+  {
+    "name": "Alex Emexezidis",
+    "short": "Alex",
+    "role": "Co-organizer",
+    "bio": "Software engineer with a decade in the games industry, building backend platform infrastructure and developer tooling that help game teams ship faster.",
+    "photo": "alex.jpg",
+    "links": {
+      "linkedin": "https://www.linkedin.com/in/emexezidis/",
+      "github": "https://github.com/polaralex",
+      "website": "https://emexezidis.com/"
+    }
+  }
+]
