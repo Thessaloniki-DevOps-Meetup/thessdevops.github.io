@@ -1,14 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/EventCard.astro';
+import UpcomingBlock from '../components/UpcomingBlock.astro';
 import { splitEvents } from '../lib/events';
 
+// upcoming may include events that are only in the Meetup feed (no event
+// file yet): they show in the "next" card and the nav, but get no card here.
 const { upcoming, past } = splitEvents();
-const orderedEvents = [...upcoming, ...past];
-const nextEventNumber = upcoming[0]?.frontmatter.number ?? null;
+const orderedEvents = [...upcoming, ...past].filter((e) => !e.external);
 ---
 
 <BaseLayout>
+  <UpcomingBlock event={upcoming[0]} />
+
   {orderedEvents.length === 0 ? (
     <div class="lg:h-screen flex items-center justify-center p-10">
       <p class="text-cream/50">No events yet.</p>
@@ -16,7 +20,7 @@ const nextEventNumber = upcoming[0]?.frontmatter.number ?? null;
   ) : (
     orderedEvents.map((event) => {
       const status = upcoming.includes(event)
-        ? (event.frontmatter.number === nextEventNumber ? 'next' : 'upcoming')
+        ? (event === upcoming[0] ? 'next' : 'upcoming')
         : 'past';
       return <EventCard event={event} status={status} />;
     })
