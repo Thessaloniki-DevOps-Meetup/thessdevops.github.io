@@ -1,0 +1,86 @@
+---
+// 404: written up as an incident. GitHub Pages serves dist/404.html for
+// any unknown path; the requested path is filled in client-side.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublishedEvents, splitEvents } from '../lib/events';
+
+const { upcoming, past } = splitEvents(getPublishedEvents());
+const suggestion = upcoming[0] ?? past[0];
+
+const causes = [
+  "It's DNS. It's always DNS.",
+  'Works on my machine.',
+  'Someone force-pushed to main.',
+  'The intern ran terraform destroy. (We don’t have an intern.)',
+  'Cache invalidation. Again.',
+  'The page is still waiting for code review.',
+  'A YAML file had a tab in it.',
+  'The pod got OOMKilled while rendering.',
+  'Expired TLS certificate. Somewhere. Probably.',
+  'Rolled back during a Friday deploy.',
+];
+
+const line = 'block';
+const prompt = 'text-accent';
+const dim = 'text-cream/45';
+---
+
+<BaseLayout title="404: page not found" description="This page doesn't exist." mobileHero={false} noindex>
+  <section class="px-6 pt-8 pb-10 md:px-10 lg:px-14 lg:pt-12 lg:pb-14">
+    <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← home</a>
+    <div class="text-[11px] tracking-widest text-cream/35 mt-8 mb-5"># incident-404.md</div>
+
+    <div class="flex items-center gap-3 flex-wrap mb-4">
+      <span class="inline-flex items-center px-2 py-0.5 text-[10px] tracking-widest border rounded-sm bg-accent/15 text-accent border-accent/40">
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-accent mr-1.5 animate-pulse"></span>
+        SEV-404 · OPEN
+      </span>
+      <span class="text-xs text-cream/45 tracking-widest">STATUS: CrashLoopBackOff</span>
+    </div>
+
+    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">Page not found</h1>
+    <p class="text-base lg:text-lg text-cream/75 mt-3">We paged the on-call. They're looking into it. (They're asleep.)</p>
+
+    <!-- Terminal -->
+    <div class="mt-8 rounded-md border border-cream/20 overflow-hidden max-w-3xl bg-black/20">
+      <div class="flex items-center gap-2 px-4 py-2 border-b border-cream/15 bg-cream/[0.04] text-[11px] tracking-widest">
+        <span class="flex gap-1.5" aria-hidden="true">
+          <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-cream/30"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-cream/30"></span>
+        </span>
+        <span class="text-cream/60 ml-2">on-call@thessdevops: ~</span>
+      </div>
+      <pre class="px-5 py-5 text-sm leading-relaxed whitespace-pre-wrap break-words"><span class={line}><span class={prompt}>$</span> kubectl get page <span data-path class="text-cream">/this-page</span></span><span class={`${line} text-accent/90`}>Error from server (NotFound): pages "<span data-path>/this-page</span>" not found</span><span class={line}> </span><span class={line}><span class={prompt}>$</span> git log --oneline -- <span data-path class="text-cream">/this-page</span></span><span class={`${line} ${dim}`}>fatal: ambiguous argument: unknown revision or path not in the working tree.</span><span class={line}> </span><span class={line}><span class={prompt}>$</span> ./diagnose.sh --root-cause</span><span class={`${line} ${dim}`}>probable cause: <span data-cause class="text-cream">{causes[0]}</span></span><span class={line}> </span><span class={line}><span class={prompt}>$</span> <span class="caret">▊</span></span></pre>
+    </div>
+
+    <!-- Postmortem -->
+    <div class="mt-10 max-w-3xl">
+      <div class="text-[11px] tracking-widest text-cream/35 mb-4"># postmortem.md</div>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm lg:text-base">
+        <dt class="text-cream/45">impact</dt>
+        <dd class="text-cream/80">1 curious engineer (you).</dd>
+        <dt class="text-cream/45">root cause</dt>
+        <dd class="text-cream/80">The page was never deployed, got moved, or is a typo in the URL. Blameless, of course.</dd>
+        <dt class="text-cream/45">action items</dt>
+        <dd class="text-cream/80">
+          <ul class="space-y-2 mt-0.5">
+            <li><span class={dim}>[ ]</span> <a href="/" class="text-accent hover:text-cream transition-colors">cd ~</a> <span class={dim}># back to the homepage</span></li>
+            <li><span class={dim}>[ ]</span> <a href="javascript:history.back()" class="text-accent hover:text-cream transition-colors">kubectl rollout undo</a> <span class={dim}># go back</span></li>
+            {suggestion && (
+              <li><span class={dim}>[ ]</span> <a href={suggestion.url} class="text-accent hover:text-cream transition-colors">open {suggestion.frontmatter.title}</a> <span class={dim}># {upcoming[0] ? 'the next meetup' : 'the latest meetup'}</span></li>
+            )}
+          </ul>
+        </dd>
+      </dl>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ causes }}>
+    var path = location.pathname;
+    try { path = decodeURIComponent(path); } catch (e) { /* malformed %-encoding: show it raw */ }
+    document.querySelectorAll('[data-path]').forEach(function (el) { el.textContent = path; });
+    var c = document.querySelector('[data-cause]');
+    if (c) c.textContent = causes[Math.floor(Math.random() * causes.length)];
+  </script>
+</BaseLayout>
