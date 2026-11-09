@@ -71,3 +71,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # GitHub disables scheduled workflows in public repos after 60 days with
+  # no repository activity (e.g. a long summer break between meetups), which
+  # would freeze "next up". Re-enabling the workflow through the API on each
+  # scheduled run keeps the daily rebuild alive without dummy commits.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Keep the daily schedule enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/deploy.yml/enable"

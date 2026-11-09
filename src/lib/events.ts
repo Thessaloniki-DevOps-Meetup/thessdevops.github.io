@@ -41,7 +41,7 @@ const talkSchema = z
 const eventSchema = z
   .object({
     number: z.number().int().nonnegative(),
-    title: z.string().optional(),
+    title: z.string().min(1, 'event title is required'),
     // Astro serialises frontmatter, so YAML dates arrive as ISO strings.
     date: z.preprocess(
       (v) =>
@@ -132,6 +132,8 @@ const slugFromPath = (path: string) => path.split('/').at(-2)!;
 
 export const eventUrl = (slug: string) => `/events/${slug}/`;
 
+const MEETUP_EVENT_URL = /^https:\/\/www\.meetup\.com\/[^/\s"'<>]+\/events\/\d+\/?$/;
+
 /** Numeric Meetup event id from a meetup.com event URL. */
 export const meetupId = (url?: string) => url?.match(/\/events\/(\d+)/)?.[1];
 
@@ -186,11 +188,13 @@ const curated = loadCurated();
 
 const toDate = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
 
-const startOfToday = () => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
+/**
+ * Today's date in Athens, as UTC midnight: the same shape as frontmatter
+ * dates, so comparisons don't depend on the build machine's timezone.
+ * scripts/sync-meetup.mjs uses the same Athens date.
+ */
+const startOfToday = () =>
+  toDate(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Athens' }).format(new Date()));
 
 const dateMs = (e: EventEntry) => new Date(e.frontmatter.date).getTime();
 
@@ -214,6 +218,7 @@ export function getAllEvents(): EventEntry[] {
   const extra: EventEntry[] = [];
 
   for (const f of feed.events) {
+    if (!MEETUP_EVENT_URL.test(f.url)) continue;
     const time = f.start ? (f.end ? `${f.start}–${f.end}` : f.start) : undefined;
     const match = byId.get(f.id);
     if (match) {
@@ -332,6 +337,10 @@ export const formatNumber = (n: number) => (n > 0 ? `#${String(n).padStart(3, '0
 
 const PAST_INLINE = 2;
 
+/** HTML-escape text and attribute values: the nav is rendered with set:html. */
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 const line = (html: string) => `<span class="nav-line">${html}</span>`;
 const punct = (t: string) => `<span class="text-cream/40">${t}</span>`;
 const linkClass = (current: boolean) =>
@@ -348,7 +357,7 @@ export function buildYamlNav(current: { slug?: string; page?: string } = {}): st
     const ext = e.external ? ' target="_blank" rel="noopener noreferrer"' : '';
     const arrow = e.external ? ' ↗' : '';
     // 6 spaces + "- " = 8ch, matched by the hanging indent of .nav-item.
-    return `<span class="nav-item">      - <a href="${e.url}"${aria}${ext} class="${linkClass(isCurrent)}">${label}${arrow}</a>${punct(':')} <span class="text-cream/40 whitespace-nowrap">${date}</span></span>`;
+    return `<span class="nav-item">      - <a href="${esc(e.url)}"${aria}${ext} class="${linkClass(isCurrent)}">${esc(label)}${arrow}</a>${punct(':')} <span class="text-cream/40 whitespace-nowrap">${esc(date)}</span></span>`;
   };
 
   const key = (name: string, indent = '  ') => line(`${indent}<span class="text-blue-gray">${name}</span>${punct(':')}`);
@@ -356,7 +365,7 @@ export function buildYamlNav(current: { slug?: string; page?: string } = {}): st
 
   // pages:
   const pageItem = (file: string, url: string, isCurrent: boolean, draft = false) =>
-    `<span class="nav-item">  - <a href="${url}"${isCurrent ? ' aria-current="page"' : ''} class="${linkClass(isCurrent)}">${file}</a>${
+    `<span class="nav-item">  - <a href="${esc(url)}"${isCurrent ? ' aria-current="page"' : ''} class="${linkClass(isCurrent)}">${esc(file)}</a>${
       draft ? ` <span class="text-cream/30 whitespace-nowrap"># draft</span>` : ''
     }</span>`;
   const pages: SitePage[] = visiblePages();

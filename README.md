@@ -122,7 +122,9 @@ Both `dev` and `build` first run:
   page. If the feed can't be fetched, the last good copy is kept; past
   events drop off automatically.
 - **Daily rebuild.** The deploy workflow also runs every day at 03:15 UTC,
-  so "next up" moves on after each meetup without anyone pushing.
+  so "next up" moves on after each meetup without anyone pushing. A
+  keep-alive step stops GitHub from pausing the schedule during long
+  breaks (it disables scheduled workflows after 60 days of inactivity).
 - **Content validation.** Every build checks event frontmatter (dates,
   URLs, required fields, misspelt keys, duplicate numbers) and fails with
   a readable list of problems. The template in

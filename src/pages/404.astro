@@ -77,7 +77,8 @@ const dim = 'text-cream/45';
   </section>
 
   <script is:inline define:vars={{ causes }}>
-    var path = decodeURIComponent(location.pathname);
+    var path = location.pathname;
+    try { path = decodeURIComponent(path); } catch (e) { /* malformed %-encoding: show it raw */ }
     document.querySelectorAll('[data-path]').forEach(function (el) { el.textContent = path; });
     var c = document.querySelector('[data-cause]');
     if (c) c.textContent = causes[Math.floor(Math.random() * causes.length)];

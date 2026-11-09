@@ -136,6 +136,11 @@ for (const ev of vevents) {
     warn(`Skipping a VEVENT with missing start/id/url/summary (${title || ev.UID?.value || '?'}).`);
     continue;
   }
+  // Only ever link to meetup.com event pages (the site renders this URL).
+  if (!/^https:\/\/www\.meetup\.com\/[^/\s"'<>]+\/events\/\d+\/?$/.test(url)) {
+    warn(`Skipping "${title}": unexpected event URL ${JSON.stringify(url)}.`);
+    continue;
+  }
   if ((end?.date ?? start.date) < todayAthens) continue; // already over
 
   events.push({
