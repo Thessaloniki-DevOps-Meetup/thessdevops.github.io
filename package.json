@@ -3,18 +3,20 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "predev": "node scripts/copy-event-assets.mjs",
+    "predev": "node scripts/copy-event-assets.mjs && node scripts/sync-meetup.mjs",
     "dev": "astro dev",
-    "prebuild": "node scripts/copy-event-assets.mjs",
+    "prebuild": "node scripts/copy-event-assets.mjs && node scripts/sync-meetup.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "check:links": "node scripts/check-event-asset-links.mjs",
     "check": "npm run build && npm run check:links",
-    "gen:og": "node scripts/generate-og-image.mjs"
+    "gen:og": "node scripts/generate-og-image.mjs",
+    "sync:meetup": "node scripts/sync-meetup.mjs"
   },
   "dependencies": {
     "@astrojs/tailwind": "^5.1.0",
     "astro": "^4.16.0",
+    "sharp": "^0.33.5",
     "tailwindcss": "^3.4.0"
   },
   "devDependencies": {

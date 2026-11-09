@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Daily rebuild: moves past events out of "upcoming" and pulls the next
+  # meetup from the Meetup feed. 03:15 UTC = 05:15/06:15 Athens time.
+  schedule:
+    - cron: '15 3 * * *'
   workflow_dispatch:
 
 permissions:
@@ -30,8 +34,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Last known good Meetup feed: if today's fetch fails, the sync script
+      # keeps this file instead of dropping the upcoming event.
+      - name: Restore Meetup feed cache
+        uses: actions/cache/restore@v4
+        with:
+          path: src/data/meetup.json
+          key: meetup-feed-${{ github.run_id }}
+          restore-keys: meetup-feed-
+
       - name: Build
         run: npm run build
+
+      - name: Save Meetup feed cache
+        if: always() && hashFiles('src/data/meetup.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: src/data/meetup.json
+          key: meetup-feed-${{ github.run_id }}
 
       - name: Check event asset links
         run: npm run check:links
