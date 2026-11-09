@@ -1,0 +1,61 @@
+---
+// One page per event at /events/<folder>/ — e.g. /events/003/.
+// Assets dropped next to index.md are served from the same folder URL
+// (/events/003/slides.pdf), so existing material links keep working.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EventCard from '../../components/EventCard.astro';
+import PhotoGallery from '../../components/PhotoGallery.astro';
+import { formatNumber, getEventPhotos, getPublishedEvents, splitEvents } from '../../lib/events';
+
+export function getStaticPaths() {
+  return getPublishedEvents().map((e) => ({ params: { slug: e.slug } }));
+}
+
+const { slug } = Astro.params;
+const { upcoming } = splitEvents(); // includes Meetup-feed events, for the "next" status
+const { upcoming: pubUpcoming, past } = splitEvents(getPublishedEvents());
+const event = getPublishedEvents().find((e) => e.slug === slug)!;
+const fm = event.frontmatter;
+
+const status = upcoming[0]?.slug === slug ? 'next' : upcoming.some((e) => e.slug === slug) ? 'upcoming' : 'past';
+const photos = getEventPhotos(slug!);
+
+// Chronological neighbours (local pages only) for the prev/next links.
+const chronological = [...past].reverse().concat(pubUpcoming);
+const i = chronological.findIndex((e) => e.slug === slug);
+const prev = chronological[i - 1];
+const next = chronological[i + 1];
+
+const title = fm.title || `Meetup ${formatNumber(fm.number)}`;
+---
+
+<BaseLayout title={title} description={fm.description} currentSlug={slug} mobileHero={false} ogImage={`/events/${slug}/og.png`}>
+  <div class="px-6 pt-6 md:px-10 lg:px-14 lg:pt-10">
+    <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← all meetups</a>
+  </div>
+
+  <EventCard event={event} status={status} />
+
+  {photos.length > 0 && <PhotoGallery photos={photos} title={title} />}
+
+  {(prev || next) && (
+    <nav aria-label="Other meetups" class="grid grid-cols-2 gap-4 px-6 py-8 md:px-10 lg:px-14 border-t border-cream/10 text-sm">
+      <div>
+        {prev && (
+          <a href={prev.url} class="group block">
+            <span class="block text-xs text-cream/40">← previous</span>
+            <span class="text-cream/80 group-hover:text-accent transition-colors">{prev.frontmatter.title}</span>
+          </a>
+        )}
+      </div>
+      <div class="text-right">
+        {next && (
+          <a href={next.url} class="group block">
+            <span class="block text-xs text-cream/40">next →</span>
+            <span class="text-cream/80 group-hover:text-accent transition-colors">{next.frontmatter.title}</span>
+          </a>
+        )}
+      </div>
+    </nav>
+  )}
+</BaseLayout>

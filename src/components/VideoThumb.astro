@@ -1,0 +1,50 @@
+---
+// YouTube cover image with a play button. Nothing from YouTube's player
+// loads until it's clicked; then it swaps in a youtube-nocookie embed.
+// Without JS it's a plain link to the video. Thumbnail: hqdefault always
+// exists (4:3 with letterbox bars, cropped to 16:9 by object-cover).
+interface Props {
+  id: string;
+  url: string;
+  title: string;
+  /** Shown under the thumbnail when `caption` is set (e.g. speakers). */
+  subtitle?: string;
+  /** Show title/subtitle under the thumbnail (media page). Off inside a talk, where the title is already shown. */
+  caption?: boolean;
+}
+const { id, url, title, subtitle, caption = false } = Astro.props;
+---
+
+<div>
+  <a href={url} target="_blank" rel="noopener noreferrer" data-yt={id} data-yt-title={title}
+     aria-label={`Play video: ${title}`}
+     class="group relative block aspect-video overflow-hidden rounded-sm border border-cream/15 bg-black hover:border-accent/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent transition-colors">
+    <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" decoding="async"
+         class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-[1.02] transition duration-300" />
+    <span class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+      <span class="flex items-center justify-center w-14 h-14 rounded-full bg-accent/90 text-primary text-xl pl-1 shadow-lg shadow-black/40 group-hover:bg-accent group-hover:scale-110 transition">▶</span>
+    </span>
+    <span class="absolute right-2 bottom-2 px-1.5 py-0.5 text-[10px] tracking-widest bg-black/70 text-cream/80 rounded-sm" aria-hidden="true">YOUTUBE</span>
+  </a>
+  {caption && (
+    <div class="mt-2">
+      <div class="text-sm font-semibold text-cream leading-snug">{title}</div>
+      {subtitle && <div class="text-xs text-cream/55 mt-0.5">{subtitle}</div>}
+    </div>
+  )}
+</div>
+
+<script>
+  document.addEventListener('click', (e) => {
+    const link = (e.target as HTMLElement | null)?.closest<HTMLAnchorElement>('a[data-yt]');
+    if (!link || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${link.dataset.yt}?autoplay=1&rel=0`;
+    iframe.title = link.dataset.ytTitle ?? 'YouTube video';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
+    iframe.allowFullscreen = true;
+    iframe.className = 'block w-full aspect-video rounded-sm border border-cream/15 bg-black';
+    link.replaceWith(iframe);
+  });
+</script>

@@ -1,44 +1,22 @@
 ---
-type Material = { type?: string; label?: string; url: string };
-type Speaker = { name: string; url?: string };
-type Talk = {
-  title: string;
-  speakers?: Speaker[];
-  description?: string;
-  slidesUrl?: string;
-  videoUrl?: string;
-  materials?: Material[];
-};
+import VideoThumb from './VideoThumb.astro';
+import { formatDateLong, formatDateParts, talkMaterials, youtubeId, type EventEntry, type Material, type Talk } from '../lib/events';
 
 interface Props {
-  event: any;
+  event: EventEntry;
   status?: 'next' | 'upcoming' | 'past';
 }
 const { event, status = 'past' } = Astro.props;
 
-const formatDateLong = (d: string | Date) =>
-  new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-
-const formatDateParts = (d: string | Date) => {
-  const date = new Date(d);
-  return {
-    day: date.toLocaleDateString('en-GB', { day: '2-digit' }),
-    month: date.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase(),
-    weekday: date.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase(),
-  };
-};
-
-const allMaterials = (t: Talk): Material[] => {
-  const out: Material[] = [];
-  if (t.slidesUrl) out.push({ type: 'slides', url: t.slidesUrl });
-  if (t.videoUrl) out.push({ type: 'video', url: t.videoUrl });
-  if (Array.isArray(t.materials)) {
-    for (const m of t.materials) {
-      if (!m?.url) continue;
-      if (!out.some((x) => x.url === m.url)) out.push(m);
-    }
-  }
-  return out;
+// YouTube links become click-to-play thumbnails; everything else stays a pill.
+const splitMaterials = (t: Talk) => {
+  const all = talkMaterials(t);
+  const videos = all.flatMap((m) => {
+    const id = youtubeId(m.url);
+    return id ? [{ id, url: m.url }] : [];
+  });
+  const pills = all.filter((m) => !youtubeId(m.url));
+  return { videos, pills };
 };
 
 const glyph = (type?: string) => {
@@ -54,7 +32,7 @@ const glyph = (type?: string) => {
 
 const labelFor = (m: Material) => m.label || m.type || 'link';
 
-const Body = event.Content;
+const Body = event.Content!;
 const hasBody = (event.rawContent?.() || '').trim().length > 0;
 const img = event.frontmatter.image;
 const parts = formatDateParts(event.frontmatter.date);
@@ -67,7 +45,7 @@ const statusTone = status === 'next'
 
 <article
   id={`event-${event.frontmatter.number}`}
-  class="lg:min-h-screen flex flex-col justify-center px-6 py-10 md:px-10 md:py-12 lg:px-14 lg:py-14 border-b border-cream/10 last:border-b-0"
+  class="px-6 pt-6 pb-10 md:px-10 md:pb-12 lg:px-14 lg:pt-8 lg:pb-14"
 >
   <div class="w-full md:grid md:grid-cols-[1fr_auto] md:gap-10 md:items-start">
 
@@ -105,7 +83,7 @@ const statusTone = status === 'next'
       <h2 class="text-2xl md:text-3xl lg:text-3xl font-bold leading-tight">{event.frontmatter.title}</h2>
 
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-cream/60 mt-2">
-        <span>{formatDateLong(event.frontmatter.date)}</span>
+        <span>{formatDateLong(event.frontmatter.date)}{event.frontmatter.time && <span class="text-cream/45"> · {event.frontmatter.time}</span>}</span>
         {event.frontmatter.location && (
           <>
             <span class="text-cream/25">·</span>
@@ -131,7 +109,7 @@ const statusTone = status === 'next'
       {event.frontmatter.talks && event.frontmatter.talks.length > 0 && (
         <div class="mt-6 space-y-4">
           {event.frontmatter.talks.map((talk: Talk) => {
-            const materials = allMaterials(talk);
+            const { videos, pills: materials } = splitMaterials(talk);
             return (
               <div class="border-l-2 border-cream/15 hover:border-accent/50 transition-colors pl-4 py-0.5">
                 <div class="text-sm lg:text-base font-semibold text-cream">{talk.title}</div>
@@ -158,6 +136,13 @@ const statusTone = status === 'next'
                         <span aria-hidden="true">{glyph(m.type)}</span>
                         <span>{labelFor(m)}</span>
                       </a>
+                    ))}
+                  </div>
+                )}
+                {videos.length > 0 && (
+                  <div class="grid sm:grid-cols-2 gap-3 mt-3 max-w-2xl">
+                    {videos.map((v) => (
+                      <VideoThumb id={v.id} url={v.url} title={talk.title} />
                     ))}
                   </div>
                 )}

@@ -1,0 +1,89 @@
+---
+// Photo grid for an event page. Photos come from
+// src/content/events/<NNN>/photos/ and are resized to WebP at build time.
+// Clicking a thumbnail opens a lightbox (<dialog>); without JS the link
+// opens the full-size image instead.
+import { Image, getImage } from 'astro:assets';
+import type { EventPhoto } from '../lib/events';
+
+interface Props {
+  photos: EventPhoto[];
+  title: string;
+}
+const { photos, title } = Astro.props;
+
+const items = await Promise.all(
+  photos.map(async (p, i) => ({
+    ...p,
+    alt: `${title} — photo ${i + 1} of ${photos.length}`,
+    full: await getImage({ src: p.src, width: Math.min(p.src.width, 1920), format: 'webp' }),
+  })),
+);
+---
+
+<section class="px-6 py-10 md:px-10 lg:px-14 border-t border-cream/10" data-gallery>
+  <div class="text-[11px] tracking-widest text-cream/35 mb-5">
+    # photos/ <span class="text-cream/25">({items.length})</span>
+  </div>
+
+  <ul class="grid grid-cols-2 md:grid-cols-3 gap-2">
+    {items.map((p) => (
+      <li>
+        <a href={p.full.src} data-photo data-alt={p.alt}
+           class="block overflow-hidden rounded-sm border border-cream/10 hover:border-accent/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent transition-colors">
+          <Image src={p.src} alt={p.alt} widths={[400, 800]} sizes="(min-width: 1024px) 20vw, (min-width: 768px) 33vw, 50vw"
+                 class="w-full aspect-[4/3] object-cover hover:scale-[1.03] transition-transform duration-300" loading="lazy" />
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <dialog class="gallery-dialog bg-transparent p-0 max-w-[96vw] max-h-[96vh] backdrop:bg-black/85 text-cream">
+    <div class="relative flex flex-col items-center">
+      <img data-full alt="" class="max-w-[96vw] max-h-[86vh] object-contain rounded-sm" />
+      <div class="flex items-center gap-4 mt-3 text-sm font-mono">
+        <button type="button" data-prev class="px-3 py-1 bg-primary border border-cream/30 rounded-sm hover:border-accent hover:text-accent" aria-label="Previous photo">‹ prev</button>
+        <span data-counter class="px-2 py-1 bg-primary rounded-sm text-cream/70 tabular-nums"></span>
+        <button type="button" data-next class="px-3 py-1 bg-primary border border-cream/30 rounded-sm hover:border-accent hover:text-accent" aria-label="Next photo">next ›</button>
+        <button type="button" data-close class="px-3 py-1 bg-primary border border-cream/30 rounded-sm hover:border-accent hover:text-accent" aria-label="Close">✕ close</button>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((root) => {
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('a[data-photo]'));
+    const dialog = root.querySelector('dialog');
+    const img = dialog?.querySelector<HTMLImageElement>('img[data-full]');
+    const counter = dialog?.querySelector('[data-counter]');
+    if (!dialog || !img || !counter || links.length === 0) return;
+
+    let index = 0;
+    const show = (i: number) => {
+      index = (i + links.length) % links.length;
+      img.src = links[index].href;
+      img.alt = links[index].dataset.alt ?? '';
+      counter.textContent = `${index + 1} / ${links.length}`;
+    };
+
+    links.forEach((a, i) =>
+      a.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let "open in new tab" work
+        e.preventDefault();
+        show(i);
+        dialog.showModal();
+      }),
+    );
+
+    dialog.querySelector('[data-prev]')?.addEventListener('click', () => show(index - 1));
+    dialog.querySelector('[data-next]')?.addEventListener('click', () => show(index + 1));
+    dialog.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
+    // Click on the backdrop closes (the dialog itself is the click target there).
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(index - 1);
+      if (e.key === 'ArrowRight') show(index + 1);
+    });
+  });
+</script>

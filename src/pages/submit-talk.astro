@@ -1,32 +1,18 @@
 ---
-import siteConfig from '../content/site.json';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import talks from '../content/talks.json';
-
-const pageTitle = `Submit a talk — ${siteConfig.name}`;
-const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = new URL('/og-image.png', Astro.site).href;
 
 const input =
   'w-full bg-transparent border border-cream/30 rounded-sm px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-accent';
 const label = 'block text-xs tracking-widest text-cream/60 mb-1.5';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Propose a talk for the Thessaloníki DevOps Meetup." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={pageUrl} />
-    <title>{pageTitle}</title>
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:image" content={ogImage} />
-    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  </head>
-  <body class="bg-primary text-cream font-mono antialiased">
-    <main class="max-w-xl mx-auto px-6 py-10">
-      <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← {siteConfig.name}</a>
+<BaseLayout title="Submit a talk" description="Propose a talk for the Thessaloníki DevOps Meetup. Beginners and first-timers welcome."
+            currentPage="submit-talk" mobileHero={false} ogImage="/og/submit-talk.png">
+  <script slot="head" is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+    <div class="max-w-xl px-6 py-8 md:px-10 lg:px-14 lg:py-12">
+      <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← home</a>
 
       <div class="text-[11px] tracking-widest text-cream/35 mt-8 mb-3"># submit-talk.md</div>
       <h1 class="text-2xl font-bold mb-2">Submit a talk</h1>
@@ -114,7 +100,7 @@ const label = 'block text-xs tracking-widest text-cream/60 mb-1.5';
         </button>
         <p id="status" role="status" class="text-sm"></p>
       </form>
-    </main>
+    </div>
 
     <script is:inline define:vars={{ api: talks.api }}>
       const form = document.getElementById('talk-form');
@@ -177,5 +163,4 @@ const label = 'block text-xs tracking-widest text-cream/60 mb-1.5';
         }
       });
     </script>
-  </body>
-</html>
+</BaseLayout>

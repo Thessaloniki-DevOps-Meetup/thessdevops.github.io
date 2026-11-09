@@ -1,0 +1,184 @@
+---
+// Shared shell for the main pages: <head> (SEO + Open Graph), the left
+// panel (about.md + nav.yaml) on desktop, and the about / nav sections on
+// mobile. Page content goes in the default slot (the right panel).
+import siteConfig from '../content/site.json';
+import Hero from '../components/Hero.astro';
+import NavYaml from '../components/NavYaml.astro';
+import { buildYamlNav } from '../lib/events';
+
+interface Props {
+  /** Page-specific title; the site name is appended. Omit on the home page. */
+  title?: string;
+  description?: string;
+  /** Slug of the event this page shows, to highlight it in the nav. */
+  currentSlug?: string;
+  /** Page id ("index", "about", "submit-talk"…), to highlight it in the nav. */
+  currentPage?: string;
+  /** Show the about block above the content on mobile (home page only). */
+  mobileHero?: boolean;
+  /** Root-relative path of the link-preview image (2400×1260 PNG). */
+  ogImage?: string;
+  ogImageAlt?: string;
+  /** Show a "draft" banner (page is not published yet). */
+  draft?: boolean;
+  /** Ask search engines not to index this page (404, drafts). */
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  currentSlug,
+  currentPage,
+  mobileHero = true,
+  ogImage: ogPath = '/og-image.png',
+  ogImageAlt: ogAlt,
+  draft = false,
+  noindex = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} — ${siteConfig.name}` : siteConfig.name;
+const pageDescription = description || siteConfig.description || siteConfig.tagline || siteConfig.name;
+const ogImage = new URL(ogPath, Astro.site).href;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const ogImageAlt = ogAlt || `${title || siteConfig.name} — ${siteConfig.tagline || ''}`.trim();
+
+const yamlNav = buildYamlNav({ slug: currentSlug, page: currentPage });
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={pageDescription} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={pageUrl} />
+    <title>{pageTitle}</title>
+    {(noindex || draft) && <meta name="robots" content="noindex" />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2400" />
+    <meta property="og:image:height" content="1260" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+    <style is:global>
+      :root {
+        --primary: #2d4a5e;
+        --accent: #e07a5f;
+        --cream: #f5f0e8;
+        --blue-gray: #d5dfe5;
+      }
+      html { scroll-behavior: smooth; }
+      /* Event body markdown */
+      .event-body :is(p, ul, ol) { color: rgba(245, 240, 232, 0.7); }
+      .event-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+      .event-body ul { list-style: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+      .event-body a { color: var(--accent); }
+      .event-body a:hover { color: var(--cream); }
+      .event-body strong { color: var(--cream); }
+      /* Blinking caret */
+      @keyframes blink { 50% { opacity: 0; } }
+      .caret { animation: blink 1.1s steps(2) infinite; }
+      /* Foldable past-events block inside nav.yaml */
+      .nav-fold summary { display: block; }
+      .nav-fold summary::-webkit-details-marker { display: none; }
+      .nav-fold summary::marker { content: ''; }
+      .nav-fold[open] > summary { display: none; }
+      .nav-fold-close { display: block; font: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; white-space: pre; }
+      /* nav.yaml lines: one block per line; event entries wrap with a
+         hanging indent aligned after "      - " (8 monospace chars). */
+      .nav-line { display: block; }
+      .nav-item { display: block; padding-left: 8ch; text-indent: -8ch; }
+    </style>
+    <slot name="head" />
+  </head>
+  <body class="bg-primary text-cream font-mono antialiased">
+
+    <!-- MOBILE-ONLY: hero on top (home page) -->
+    {mobileHero && (
+      <section class="lg:hidden border-b border-cream/15 px-6 py-7">
+        <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
+        <Hero />
+      </section>
+    )}
+
+    <div class="lg:flex lg:flex-row">
+
+      <!-- DESKTOP-ONLY: left aside with about (top) + nav (bottom).
+           Scrolls with the page (one scroll for everything, no inner
+           scroll boxes); stretches to full height so the divider runs
+           all the way down. -->
+      <aside class="hidden lg:flex lg:w-2/5 lg:flex-col lg:border-r lg:border-cream/15 bg-primary">
+        <!-- about.md -->
+        <section class="px-9 py-8 border-b border-cream/15">
+          <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
+          <Hero />
+        </section>
+
+        <!-- nav.yaml -->
+        <section class="px-9 py-8">
+          <div class="text-[11px] tracking-widest text-cream/35 mb-4"># nav.yaml</div>
+          <NavYaml yamlNav={yamlNav} />
+        </section>
+      </aside>
+
+      <!-- RIGHT PANEL: page content -->
+      <main class="lg:w-3/5 min-w-0">
+        {draft && (
+          <div class="mx-6 mt-6 md:mx-10 lg:mx-14 px-4 py-3 border border-dashed border-accent/60 rounded-sm text-sm text-accent bg-accent/[0.06]">
+            <strong>DRAFT</strong> · not published. Visible only in <code>npm run dev</code> or builds with <code>SHOW_DRAFTS=1</code>.
+            Publish by setting <code>"draft": false</code> in <code>src/content/pages.json</code>.
+          </div>
+        )}
+        <slot />
+      </main>
+    </div>
+
+    <!-- MOBILE-ONLY: sticky-bottom jump-to-nav bar.
+         Pinned to viewport bottom while content is in view; when the nav
+         section enters the viewport from below, the bar un-sticks and
+         scrolls up naturally, revealing the nav. -->
+    <a
+      href="#nav"
+      class="lg:hidden sticky bottom-0 z-20 flex items-center justify-center gap-2 py-3 bg-primary/95 backdrop-blur border-t border-cream/20 text-xs text-cream/70 hover:text-accent transition-colors"
+    >
+      <span class="text-cream/40">▲</span>
+      <span class="tracking-widest"># nav.yaml</span>
+    </a>
+
+    <!-- MOBILE-ONLY: full nav at bottom of document -->
+    <section id="nav" class="lg:hidden px-6 py-8 pb-12">
+      <NavYaml yamlNav={yamlNav} />
+    </section>
+
+    <script>
+      // "# collapse ▴" button inside the folded past-events block.
+      document.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement | null)?.closest('.nav-fold-close');
+        if (!btn) return;
+        const details = btn.closest('details');
+        if (details) {
+          details.open = false;
+          details.scrollIntoView({ block: 'nearest' });
+        }
+      });
+    </script>
+
+  </body>
+</html>

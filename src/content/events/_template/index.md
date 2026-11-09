@@ -2,11 +2,13 @@
 number: 0
 title: ""
 date: 1970-01-01
+time: ""                   # optional, Athens time, e.g. "19:00–22:00"
 location: ""
 locationUrl: ""
 meetupUrl: ""
 description: ""
 image: ""                  # optional: /events/<NNN>/hero.jpg (drop file beside this index.md)
+                           # photos: drop them into a photos/ folder next to this file → gallery on the event page
 draft: true
 talks:
   - title: ""
