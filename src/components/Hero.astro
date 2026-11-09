@@ -1,5 +1,11 @@
 ---
 import siteConfig from '../content/site.json';
+
+// mailto: link to the main contact, with the other organizers cc'd.
+const cc = (siteConfig.emailCc ?? []).join(',');
+const mailto = siteConfig.email
+  ? `mailto:${siteConfig.email}${cc ? `?cc=${cc}` : ''}`
+  : null;
 ---
 <div class="flex items-center gap-2 text-xs text-cream/45 mb-3">
   <span class="inline-block w-1.5 h-1.5 rounded-full bg-accent"></span>
@@ -50,7 +56,11 @@ import siteConfig from '../content/site.json';
 
 <p class="text-sm text-cream/55 mt-5 max-w-md leading-relaxed">
   Want to <span class="text-cream/80">host</span> or <span class="text-cream/80">sponsor</span>?
-  Reach out on any channel above.
+  {mailto ? (
+    <>Reach out to <a href={mailto} class="text-accent hover:text-cream underline underline-offset-2 transition-colors">our email</a>.</>
+  ) : (
+    <>Reach out on any channel above.</>
+  )}
 </p>
 
 <div class="flex flex-wrap items-center gap-3 mt-4 text-sm text-cream/55">
