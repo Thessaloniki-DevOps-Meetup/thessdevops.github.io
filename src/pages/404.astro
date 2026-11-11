@@ -1,0 +1,48 @@
+---
+// 404. GitHub Pages serves dist/404.html for any unknown path; the
+// requested path is filled in client-side. Kept plain like the forms:
+// no site layout, just a way back home.
+import siteConfig from '../content/site.json';
+
+const pageTitle = `404 — ${siteConfig.name}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="This page doesn't exist." />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="bg-primary text-cream font-mono antialiased">
+    <main class="max-w-xl mx-auto px-6 py-10 min-h-screen flex flex-col">
+      <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← {siteConfig.name}</a>
+
+      <div class="flex-1 flex flex-col items-center justify-center text-center pb-16">
+        <h1 class="text-8xl md:text-9xl font-bold tracking-tight">404</h1>
+        <p class="text-sm text-cream/65 mt-4">We paged the on-call. (They're asleep.)</p>
+
+        <div class="mt-10 w-full rounded-md border border-cream/20 overflow-hidden bg-black/20 text-left">
+          <div class="flex items-center gap-2 px-4 py-2 border-b border-cream/15 bg-cream/[0.04] text-[11px] tracking-widest">
+            <span class="flex gap-1.5" aria-hidden="true">
+              <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-cream/30"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-cream/30"></span>
+            </span>
+            <span class="text-cream/60 ml-2">on-call@thessdevops: ~</span>
+          </div>
+          <pre class="px-4 py-4 text-xs leading-relaxed whitespace-pre-wrap break-words"><span class="block"><span class="text-accent">$</span> kubectl get page <span data-path>/this-page</span></span><span class="block text-accent/90">Error from server (NotFound): pages "<span data-path>/this-page</span>" not found</span></pre>
+        </div>
+      </div>
+    </main>
+
+    <script is:inline>
+      var path = location.pathname;
+      try { path = decodeURIComponent(path); } catch (e) { /* malformed %-encoding: show it raw */ }
+      document.querySelectorAll('[data-path]').forEach(function (el) { el.textContent = path; });
+    </script>
+  </body>
+</html>
