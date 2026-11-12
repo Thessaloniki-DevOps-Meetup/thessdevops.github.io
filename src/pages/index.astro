@@ -1,235 +1,67 @@
 ---
-import siteConfig from '../content/site.json';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/EventCard.astro';
-import Hero from '../components/Hero.astro';
-import NavYaml from '../components/NavYaml.astro';
+import { splitEvents } from '../lib/events';
 
-const allEvents = await Astro.glob('../content/events/**/*.md');
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-const publishedEvents = allEvents
-  .filter((e) => !e.frontmatter.draft && e.frontmatter.number && e.frontmatter.number > 0);
-
-const upcomingEvents = publishedEvents
-  .filter((e) => new Date(e.frontmatter.date) >= today)
-  .sort((a, b) => new Date(a.frontmatter.date).getTime() - new Date(b.frontmatter.date).getTime());
-
-const pastEvents = publishedEvents
-  .filter((e) => new Date(e.frontmatter.date) < today)
-  .sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
-
-const orderedEvents = [...upcomingEvents, ...pastEvents];
-const nextEventNumber = upcomingEvents[0]?.frontmatter.number ?? null;
-
-// YAML nav: site + navigation (no socials — those live in the hero CTAs)
-const buildEventNav = (e: any) => {
-  const title = e.frontmatter.title ?? '';
-  const date = e.frontmatter.date
-    ? new Date(e.frontmatter.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    : '';
-  const label = title || `event ${String(e.frontmatter.number).padStart(3, '0')}`;
-  return `      - <a href="#event-${e.frontmatter.number}" class="text-cream/80 hover:text-accent transition-colors">${label}</a><span class="text-cream/40">:</span> <span class="text-cream/40">${date || '~'}</span>`;
-};
-
-const upcomingNav = upcomingEvents.length > 0
-  ? `  <span class="text-blue-gray">upcoming</span><span class="text-cream/40">:</span>\n${upcomingEvents.map(buildEventNav).join('\n')}`
-  : '';
-
-const PAST_INLINE = 2;
-const pastInline = pastEvents.slice(0, PAST_INLINE);
-const pastFolded = pastEvents.slice(PAST_INLINE);
-
-const foldedBlock = pastFolded.length > 0
-  ? `<details class="nav-fold"><summary class="cursor-pointer list-none"><span class="text-cream/40 hover:text-accent transition-colors">      # ${pastFolded.length} more ▸</span></summary>${pastFolded.map((e) => '\n' + buildEventNav(e)).join('')}\n<button type="button" class="nav-fold-close text-cream/40 hover:text-accent transition-colors">      # collapse ▴</button></details>`
-  : '';
-
-const pastNav = pastEvents.length > 0
-  ? `  <span class="text-blue-gray">past</span><span class="text-cream/40">:</span>\n${[
-      pastInline.map(buildEventNav).join('\n'),
-      foldedBlock,
-    ].filter(Boolean).join('\n')}`
-  : '';
-
-const eventsNav = [upcomingNav, pastNav].filter(Boolean).join('\n');
-
-const yamlNav = `<span class="text-cream/40">---</span>
-<span class="text-accent">events</span><span class="text-cream/40">:</span>
-${eventsNav}`;
-
-const pageTitle = siteConfig.name;
-const pageDescription = siteConfig.description || siteConfig.tagline || siteConfig.name;
-const ogImage = new URL('/og-image.png', Astro.site).href;
-const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const { upcoming, past } = splitEvents();
+const orderedEvents = [...upcoming, ...past];
+const nextEventNumber = upcoming[0]?.frontmatter.number ?? null;
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={pageDescription} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={pageUrl} />
-    <title>{pageTitle}</title>
-
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={pageTitle} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={pageDescription} />
-    <meta property="og:url" content={pageUrl} />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="2400" />
-    <meta property="og:image:height" content="1260" />
-    <meta property="og:image:alt" content={`${pageTitle} — ${siteConfig.tagline || ''}`.trim()} />
-
-    <!-- Twitter / X -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={pageTitle} />
-    <meta name="twitter:description" content={pageDescription} />
-    <meta name="twitter:image" content={ogImage} />
-    <meta name="twitter:image:alt" content={`${pageTitle} — ${siteConfig.tagline || ''}`.trim()} />
-    <style is:global>
-      :root {
-        --primary: #2d4a5e;
-        --accent: #e07a5f;
-        --cream: #f5f0e8;
-        --blue-gray: #d5dfe5;
-      }
-      html { scroll-behavior: smooth; }
-      /* Event body markdown */
-      .event-body :is(p, ul, ol) { color: rgba(245, 240, 232, 0.7); }
-      .event-body p { margin-bottom: 0.75rem; line-height: 1.6; }
-      .event-body ul { list-style: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
-      .event-body a { color: var(--accent); }
-      .event-body a:hover { color: var(--cream); }
-      .event-body strong { color: var(--cream); }
-      /* Blinking caret */
-      @keyframes blink { 50% { opacity: 0; } }
-      .caret { animation: blink 1.1s steps(2) infinite; }
-      /* Foldable past-events block inside nav.yaml */
-      .nav-fold summary { display: block; }
-      .nav-fold summary::-webkit-details-marker { display: none; }
-      .nav-fold summary::marker { content: ''; }
-      .nav-fold[open] > summary { display: none; }
-      .nav-fold-close { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
-    </style>
-  </head>
-  <body class="bg-primary text-cream font-mono antialiased">
-
-    <!-- MOBILE-ONLY: hero on top -->
-    <section class="lg:hidden border-b border-cream/15 px-6 py-7">
-      <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
-      <Hero />
-    </section>
-
-    <div class="lg:flex lg:flex-row lg:items-start">
-
-      <!-- DESKTOP-ONLY: left aside with about (top) + nav (bottom) -->
-      <aside class="hidden lg:flex lg:w-2/5 lg:h-screen lg:sticky lg:top-0 lg:self-start lg:flex-col lg:border-r lg:border-cream/15 bg-primary">
-        <!-- about.md -->
-        <section class="flex-[55] min-h-0 overflow-auto px-9 py-8 border-b border-cream/15">
-          <div class="text-[11px] tracking-widest text-cream/35 mb-4"># about.md</div>
-          <Hero />
-        </section>
-
-        <!-- nav.yaml -->
-        <section class="flex-[45] min-h-0 overflow-auto px-9 py-8">
-          <div class="text-[11px] tracking-widest text-cream/35 mb-4"># nav.yaml</div>
-          <NavYaml yamlNav={yamlNav} />
-        </section>
-      </aside>
-
-      <!-- RIGHT PANEL: events -->
-      <main class="lg:w-3/5">
-        {orderedEvents.length === 0 ? (
-          <div class="lg:h-screen flex items-center justify-center p-10">
-            <p class="text-cream/50">No events yet.</p>
-          </div>
-        ) : (
-          orderedEvents.map((event) => {
-            const isUpcoming = new Date(event.frontmatter.date) >= today;
-            const status = isUpcoming
-              ? (event.frontmatter.number === nextEventNumber ? 'next' : 'upcoming')
-              : 'past';
-            return <EventCard event={event} status={status} />;
-          })
-        )}
-      </main>
+<BaseLayout>
+  {orderedEvents.length === 0 ? (
+    <div class="lg:h-screen flex items-center justify-center p-10">
+      <p class="text-cream/50">No events yet.</p>
     </div>
+  ) : (
+    orderedEvents.map((event) => {
+      const status = upcoming.includes(event)
+        ? (event.frontmatter.number === nextEventNumber ? 'next' : 'upcoming')
+        : 'past';
+      return <EventCard event={event} status={status} />;
+    })
+  )}
 
-    <!-- MOBILE-ONLY: sticky-bottom jump-to-nav bar.
-         Pinned to viewport bottom while events are in view; when the nav
-         section enters the viewport from below, the bar un-sticks and
-         scrolls up naturally, revealing the nav. -->
-    <a
-      href="#nav"
-      class="lg:hidden sticky bottom-0 z-20 flex items-center justify-center gap-2 py-3 bg-primary/95 backdrop-blur border-t border-cream/20 text-xs text-cream/70 hover:text-accent transition-colors"
-    >
-      <span class="text-cream/40">▲</span>
-      <span class="tracking-widest"># nav.yaml</span>
-    </a>
+  <script>
+    // PageUp/PageDown jump between event sections instead of generic scroll.
+    const getEvents = () =>
+      Array.from(document.querySelectorAll('article[id^="event-"]')) as HTMLElement[];
 
-    <!-- MOBILE-ONLY: full nav at bottom of document -->
-    <section id="nav" class="lg:hidden px-6 py-8 pb-12">
-      <NavYaml yamlNav={yamlNav} />
-    </section>
-
-    <script>
-      // PageUp/PageDown jump between event sections instead of generic scroll.
-      const getEvents = () =>
-        Array.from(document.querySelectorAll('article[id^="event-"]')) as HTMLElement[];
-
-      const currentIndex = (events: HTMLElement[]) => {
-        const probe = window.innerHeight * 0.35;
-        let idx = 0;
-        let bestDist = Infinity;
-        events.forEach((el, i) => {
-          const top = el.getBoundingClientRect().top;
-          const dist = Math.abs(top - probe);
-          if (top <= probe + 1 && dist < bestDist) {
-            bestDist = dist;
-            idx = i;
-          }
-        });
-        return idx;
-      };
-
-      const jump = (delta: number) => {
-        const events = getEvents();
-        if (events.length === 0) return;
-        const here = currentIndex(events);
-        const target = Math.max(0, Math.min(events.length - 1, here + delta));
-        events[target].scrollIntoView({ behavior: 'smooth', block: 'start' });
-      };
-
-      document.addEventListener('click', (e) => {
-        const btn = (e.target as HTMLElement | null)?.closest('.nav-fold-close');
-        if (!btn) return;
-        const details = btn.closest('details');
-        if (details) {
-          details.open = false;
-          details.scrollIntoView({ block: 'nearest' });
+    const currentIndex = (events: HTMLElement[]) => {
+      const probe = window.innerHeight * 0.35;
+      let idx = 0;
+      let bestDist = Infinity;
+      events.forEach((el, i) => {
+        const top = el.getBoundingClientRect().top;
+        const dist = Math.abs(top - probe);
+        if (top <= probe + 1 && dist < bestDist) {
+          bestDist = dist;
+          idx = i;
         }
       });
+      return idx;
+    };
 
-      document.addEventListener('keydown', (e) => {
-        const t = e.target as HTMLElement | null;
-        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-        if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const jump = (delta: number) => {
+      const events = getEvents();
+      if (events.length === 0) return;
+      const here = currentIndex(events);
+      const target = Math.max(0, Math.min(events.length - 1, here + delta));
+      events[target].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
-        if (e.key === 'PageDown') {
-          e.preventDefault();
-          jump(1);
-        } else if (e.key === 'PageUp') {
-          e.preventDefault();
-          jump(-1);
-        }
-      });
-    </script>
+    document.addEventListener('keydown', (e) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
 
-  </body>
-</html>
+      if (e.key === 'PageDown') {
+        e.preventDefault();
+        jump(1);
+      } else if (e.key === 'PageUp') {
+        e.preventDefault();
+        jump(-1);
+      }
+    });
+  </script>
+</BaseLayout>
