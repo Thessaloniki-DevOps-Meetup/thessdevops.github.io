@@ -5,7 +5,7 @@ date: 2026-01-29
 location: "OK!Thess"
 locationUrl: "https://maps.app.goo.gl/d2A8cMUynZ2B6XCe7"
 meetupUrl: "https://www.meetup.com/thessaloniki-devops-meetup/events/312863641"
-description: "DevOps for game developement and Observability"
+description: "DevOps for game development and Observability"
 image: ""
 draft: false
 talks:
