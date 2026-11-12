@@ -2,7 +2,8 @@
   "name": "Thessaloníki DevOps Meetup",
   "tagline": "Let's meet and discuss about everything DevOps!",
   "description": "From Kubernetes to home brewed Raspberry Pi clusters, this is the place to meet new peers with the same passion keeping a DIY ethics first.",
-  "email": "",
+  "email": "dimi@thessdevops.org",
+  "emailCc": ["alex@thessdevops.org"],
   "socials": {
     "meetup": "https://www.meetup.com/thessaloniki-devops-meetup/",
     "youtube": "https://www.youtube.com/@thessdevops",

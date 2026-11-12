@@ -176,7 +176,8 @@ Edit `src/content/site.json`:
   "name": "Thessaloníki DevOps Meetup",
   "tagline": "Let's meet and discuss about everything DevOps!",
   "description": "...",
-  "email": "",
+  "email": "dimi@thessdevops.org",
+  "emailCc": ["alex@thessdevops.org"],
   "socials": {
     "meetup": "https://www.meetup.com/thessaloniki-devops-meetup/",
     "discord": "",
@@ -185,6 +186,10 @@ Edit `src/content/site.json`:
   }
 }
 ```
+
+`email` is used for the "Want to host or sponsor? Reach out to our email"
+line in the about panel; everyone in `emailCc` is cc'd. Leave `email`
+empty to fall back to "Reach out on any channel above."
 
 ## Deployment
 
