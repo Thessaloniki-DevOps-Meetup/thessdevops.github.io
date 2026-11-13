@@ -1,0 +1,34 @@
+---
+// Small orange tile: DAYS LEFT (to the next meetup) / FIRES SUBMITTED (talk submissions).
+// Styled like the NEXT UP badge; links to /fire. Numbers are filled in client-side.
+import talks from '../content/talks.json';
+
+interface Props {
+  date: string | Date;
+}
+const { date } = Astro.props;
+const isoDate = new Date(date).toISOString().slice(0, 10);
+const countUrl = new URL('count', talks.api).href;
+---
+
+<a
+  href="/fire"
+  data-fire
+  data-date={isoDate}
+  data-count-url={countUrl}
+  class="mt-6 inline-grid grid-cols-2 border border-accent/40 bg-accent/15 text-accent rounded-sm hover:bg-accent/25 transition-colors"
+>
+  <span class="px-4 py-2.5 text-center">
+    <span data-fire-days class="block text-2xl font-bold leading-none">—</span>
+    <span class="block text-[10px] tracking-widest mt-1.5">DAYS<br />LEFT</span>
+  </span>
+  <span class="px-4 py-2.5 text-center border-l border-accent/40">
+    <span data-fire-count class="block text-2xl font-bold leading-none">—</span>
+    <span class="block text-[10px] tracking-widest mt-1.5">FIRES<br />SUBMITTED</span>
+  </span>
+</a>
+
+<script>
+  import { initFire } from '../scripts/fire';
+  document.querySelectorAll<HTMLElement>('[data-fire]').forEach(initFire);
+</script>

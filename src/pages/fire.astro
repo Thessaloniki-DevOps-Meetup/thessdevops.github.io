@@ -1,0 +1,47 @@
+---
+// /fire — two numbers: days to the next meetup, and talk submissions so far.
+// Standalone like 404.astro (no site layout). Numbers are filled in client-side
+// (see src/scripts/fire.ts): the countdown from the next event's date, the count
+// from the talks Worker (GET /count).
+import siteConfig from '../content/site.json';
+import talks from '../content/talks.json';
+import { splitEvents } from '../lib/events';
+
+const pageTitle = `🔥 — ${siteConfig.name}`;
+const next = splitEvents().upcoming[0];
+const nextDate = next ? new Date(next.frontmatter.date).toISOString().slice(0, 10) : '';
+const countUrl = new URL('count', talks.api).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="bg-primary text-cream font-mono antialiased">
+    <main data-fire data-date={nextDate} data-count-url={countUrl} class="max-w-3xl mx-auto px-6 py-10 min-h-screen flex flex-col">
+      <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← {siteConfig.name}</a>
+
+      <div class="flex-1 flex flex-col md:flex-row items-center justify-center text-center pb-16 gap-16 md:gap-16">
+        <div>
+          <p data-fire-days class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
+          <p class="text-sm text-cream/65 mt-4">days left</p>
+        </div>
+        <div class="hidden md:block w-px h-40 bg-cream/25" aria-hidden="true"></div>
+        <div>
+          <p data-fire-count class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
+          <p class="text-sm text-cream/65 mt-4">fires submitted</p>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      import { initFire } from '../scripts/fire';
+      document.querySelectorAll<HTMLElement>('[data-fire]').forEach(initFire);
+    </script>
+  </body>
+</html>
