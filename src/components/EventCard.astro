@@ -1,4 +1,5 @@
 ---
+import FireTile from './FireTile.astro';
 type Material = { type?: string; label?: string; url: string };
 type Speaker = { name: string; url?: string };
 type Talk = {
@@ -172,6 +173,8 @@ const statusTone = status === 'next'
           <Body />
         </div>
       )}
+
+      {status === 'next' && <FireTile date={event.frontmatter.date} />}
     </div>
 
     <!-- Right column: date (md+ only) -->

@@ -1,8 +1,8 @@
 ---
 // /fire — two numbers: days to the next meetup, and talk submissions so far.
-// Standalone like 404.astro (no site layout). The countdown is computed in the
-// browser from the next upcoming event's date; the submission count is fetched
-// client-side from the talks Worker (GET /count).
+// Standalone like 404.astro (no site layout). Numbers are filled in client-side
+// (see src/scripts/fire.ts): the countdown from the next event's date, the count
+// from the talks Worker (GET /count).
 import siteConfig from '../content/site.json';
 import talks from '../content/talks.json';
 import { splitEvents } from '../lib/events';
@@ -23,33 +23,24 @@ const countUrl = new URL('count', talks.api).href;
     <title>{pageTitle}</title>
   </head>
   <body class="bg-primary text-cream font-mono antialiased">
-    <main class="max-w-xl mx-auto px-6 py-10 min-h-screen flex flex-col">
+    <main data-fire data-date={nextDate} data-count-url={countUrl} class="max-w-3xl mx-auto px-6 py-10 min-h-screen flex flex-col">
       <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← {siteConfig.name}</a>
 
-      <div class="flex-1 flex flex-col items-center justify-center text-center pb-16 gap-16">
+      <div class="flex-1 flex flex-col md:flex-row items-center justify-center text-center pb-16 gap-16 md:gap-24">
         <div>
-          <p id="days" class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
+          <p data-fire-days class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
           <p class="text-sm text-cream/65 mt-4">days to the meetup</p>
         </div>
         <div>
-          <p id="count" class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
+          <p data-fire-count class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
           <p class="text-sm text-cream/65 mt-4">talk submissions</p>
         </div>
       </div>
     </main>
 
-    <script is:inline define:vars={{ nextDate, countUrl }}>
-      if (nextDate) {
-        // Whole calendar days from today (local) to the event date; 0 on the day itself.
-        var t = new Date(); t = Date.UTC(t.getFullYear(), t.getMonth(), t.getDate());
-        var p = nextDate.split('-');
-        var days = Math.round((Date.UTC(+p[0], +p[1] - 1, +p[2]) - t) / 86400000);
-        if (days >= 0) document.getElementById('days').textContent = days;
-      }
-      fetch(countUrl)
-        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function (d) { if (typeof d.count === 'number') document.getElementById('count').textContent = d.count; })
-        .catch(function () { /* leave the dash */ });
+    <script>
+      import { initFire } from '../scripts/fire';
+      document.querySelectorAll<HTMLElement>('[data-fire]').forEach(initFire);
     </script>
   </body>
 </html>
