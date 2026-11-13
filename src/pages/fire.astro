@@ -26,11 +26,12 @@ const countUrl = new URL('count', talks.api).href;
     <main data-fire data-date={nextDate} data-count-url={countUrl} class="max-w-3xl mx-auto px-6 py-10 min-h-screen flex flex-col">
       <a href="/" class="text-xs text-cream/50 hover:text-accent transition-colors">← {siteConfig.name}</a>
 
-      <div class="flex-1 flex flex-col md:flex-row items-center justify-center text-center pb-16 gap-16 md:gap-24">
+      <div class="flex-1 flex flex-col md:flex-row items-center justify-center text-center pb-16 gap-16 md:gap-16">
         <div>
           <p data-fire-days class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
           <p class="text-sm text-cream/65 mt-4">days left</p>
         </div>
+        <div class="hidden md:block w-px h-40 bg-cream/25" aria-hidden="true"></div>
         <div>
           <p data-fire-count class="text-8xl md:text-9xl font-bold tracking-tight" aria-live="polite">—</p>
           <p class="text-sm text-cream/65 mt-4">fires submitted</p>
