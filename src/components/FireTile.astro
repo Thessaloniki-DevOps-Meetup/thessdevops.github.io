@@ -16,16 +16,15 @@ const countUrl = new URL('count', talks.api).href;
   data-fire
   data-date={isoDate}
   data-count-url={countUrl}
-  class="mt-6 inline-flex items-stretch border border-accent/40 bg-accent/15 text-accent rounded-sm hover:bg-accent/25 transition-colors"
+  class="mt-6 inline-grid grid-cols-2 border border-accent/40 bg-accent/15 text-accent rounded-sm hover:bg-accent/25 transition-colors"
 >
   <span class="px-4 py-2.5 text-center">
     <span data-fire-days class="block text-2xl font-bold leading-none">—</span>
-    <span class="block text-[10px] tracking-widest mt-1.5">DAYS LEFT</span>
+    <span class="block text-[10px] tracking-widest mt-1.5">DAYS<br />LEFT</span>
   </span>
-  <span class="w-px bg-accent/40" aria-hidden="true"></span>
-  <span class="px-4 py-2.5 text-center">
+  <span class="px-4 py-2.5 text-center border-l border-accent/40">
     <span data-fire-count class="block text-2xl font-bold leading-none">—</span>
-    <span class="block text-[10px] tracking-widest mt-1.5">FIRES SUBMITTED</span>
+    <span class="block text-[10px] tracking-widest mt-1.5">FIRES<br />SUBMITTED</span>
   </span>
 </a>
 
