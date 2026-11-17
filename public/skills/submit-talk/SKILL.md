@@ -21,11 +21,9 @@ Ask the user which one they want. The `duration` field takes exactly one of thes
 
 | `duration` | What it is |
 | --- | --- |
-| `Fireside` | A short story from the trenches: the 3am pages, the weekend firefights, the moments of madness. No slides needed. **This is the one for the next meetup**: Meetup #199, "Nightmare Before Christmas", on 17 December 2026 at OK!Thess is a fireside edition with no traditional talks. |
+| `Fireside` | A short story from the trenches: the 3am pages, the weekend firefights, the moments of madness. No slides needed. |
 | `20` | A 20-minute talk. |
 | `40` | A 40-minute talk. |
-
-If the user just wants to speak at the upcoming meetup, suggest `Fireside`. The 20 and 40-minute formats are for future meetups (the schedule is at <https://www.thessdevops.org>).
 
 ## Before you submit
 
